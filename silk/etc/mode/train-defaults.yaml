@@ -1,0 +1,27 @@
+defaults:
+  - defaults
+
+command: "training"
+continue_from_checkpoint: null
+# continue_from_checkpoint: /root/silk/lightning_logs/silkimpl_pose_5_C_3/checkpoints/epoch=89-step=89999.ckpt
+# continue_from_checkpoint: /root/silk/lightning_logs/sfm_depth_corr_v4_silkonly/checkpoints/epoch=3-step=3999.ckpt
+# continue_from_checkpoint: /root/silk/lightning_logs/formatted_kitti_odom_default_setting/checkpoints/epoch=95-step=95999.ckpt
+# continue_from_checkpoint: /root/silk/assets/models/silk/analysis/alpha/pvgg-4.ckpt
+# here for pretrained model maybe.
+model: ???
+trainer:
+  strategy: ddp
+  _target_: pytorch_lightning.Trainer
+  gpus: ${ref:default.ngpus}
+  # change benchmark to False if your model input size changes between iterations
+  benchmark: true
+loaders:
+  training:
+    _target_: torch.utils.data.DataLoader
+    dataset: ???
+    num_workers: ${ref:default.loader.training.workers}
+  validation:
+    _target_: torch.utils.data.DataLoader
+    dataset: ???
+    num_workers: ${ref:default.loader.validation.workers}
+    shuffle: false

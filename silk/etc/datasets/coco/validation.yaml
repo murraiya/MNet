@@ -1,0 +1,6 @@
+defaults:
+  - defaults
+  - _self_
+
+root: /data/COCO/val2017
+annFile: /data/COCO/annotations/captions_val2017.json

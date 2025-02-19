@@ -1,0 +1,7 @@
+defaults:
+  - defaults
+  - _self_
+
+# root: /datasets01/COCO/022719/val2017
+root: "/data/SiT"
+train: True

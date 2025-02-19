@@ -1,0 +1,6 @@
+defaults:
+  - defaults
+  - _self_
+
+root: "/data/MOTkitti/formatted/test"
+train: False

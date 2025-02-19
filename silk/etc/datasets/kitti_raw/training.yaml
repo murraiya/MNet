@@ -1,0 +1,7 @@
+defaults:
+  - defaults
+  - _self_
+
+# root: /datasets01/COCO/022719/train2017
+kitti_raw_path: "/data/sfm_formatted_kitti_raw/"
+train: True

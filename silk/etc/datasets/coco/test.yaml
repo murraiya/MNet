@@ -1,0 +1,6 @@
+defaults:
+  - defaults
+  - _self_
+
+root: /data/COCO/test2017
+annFile: null

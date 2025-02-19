@@ -1,0 +1,191 @@
+formatter:
+  _target_: silk.config.formatter.get_formatter
+  name: python
+logger:
+  handlers:
+    stderr-dev:
+      sink:
+        _target_: silk.logger.stderr
+      format: '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level>
+        | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'
+      level: DEBUG
+    record-all:
+      sink: ${mode.command}.log
+      format: '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level>
+        | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'
+      level: TRACE
+debug: false
+default:
+  ngpus:
+  - 0
+  - 1
+  ncpus:
+    _value_: ${self_instantiate:}
+    _target_: silk.config.hardware.get_cpus
+  loader:
+    defaults:
+      workers: 24
+    training:
+      workers: ${..defaults.workers}
+    validation:
+      workers: ${..defaults.workers}
+    test:
+      workers: ${..defaults.workers}
+mode:
+  command: training
+  continue_from_checkpoint: null
+  model:
+    contextualizer: null
+    ghost_similarity: null
+    learn_ghost_similarity: false
+    feature_downsampling_mode: padding
+    greyscale_input: true
+    optimizer_spec:
+      _target_: silk.config.optimizer.Spec
+      optimizer_class: torch.optim.Adam
+      lr: 0.0001
+      betas:
+      - 0.9
+      - 0.999
+    image_aug_transform:
+      _target_: silk.transforms.cv.image.Albu
+      _args_:
+      - _target_: albumentations.Compose
+        p: 0.95
+        transforms:
+        - _target_: albumentations.RandomGamma
+          p: 0.1
+          gamma_limit:
+          - 15
+          - 65
+        - _target_: albumentations.HueSaturationValue
+          p: 0.1
+          val_shift_limit:
+          - -100
+          - -40
+        - _target_: albumentations.Blur
+          p: 0.1
+          blur_limit:
+          - 3
+          - 9
+        - _target_: albumentations.MotionBlur
+          p: 0.2
+          blur_limit:
+          - 3
+          - 25
+        - _target_: albumentations.RandomBrightnessContrast
+          p: 0.5
+          brightness_limit:
+          - -0.3
+          - 0.0
+          contrast_limit:
+          - -0.5
+          - 0.3
+        - _target_: albumentations.GaussNoise
+          p: 0.5
+    _target_: silk.models.silk.SiLKRandomHomographies
+    training_random_homography_kwargs:
+      scaling_sampler:
+        _target_: silk.config.sampler.Uniform
+        min_value: 0.6
+        max_value: 0.9
+      x_rotation_sampler:
+        _target_: silk.config.sampler.Uniform
+        min_value: -0.78
+        max_value: 0.78
+      y_rotation_sampler:
+        _target_: silk.config.sampler.Uniform
+        min_value: -0.78
+        max_value: 0.78
+      z_rotation_sampler:
+        _target_: silk.config.sampler.Uniform
+        min_value: -0.39
+        max_value: 0.39
+    model:
+      _target_: silk.backbones.silk.silk.SiLKVGG
+      in_channels: 1
+      detection_threshold: 1.0
+      detection_top_k: 3000
+      nms_dist: 0
+      padding: 0
+      border_dist: 0
+      descriptor_scale_factor: 1.41
+      backbone:
+        _target_: silk.backbones.superpoint.vgg.ParametricVGG
+        input_num_channels: 1
+        use_max_pooling: false
+        padding: 0
+        channels:
+        - 64
+        - 64
+        - 128
+        - 128
+        normalization_fn:
+        - _target_: torch.nn.BatchNorm2d
+          affine: true
+          num_features: 64
+        - _target_: torch.nn.BatchNorm2d
+          affine: true
+          num_features: 64
+        - _target_: torch.nn.BatchNorm2d
+          affine: true
+          num_features: 128
+        - _target_: torch.nn.BatchNorm2d
+          affine: true
+          num_features: 128
+  trainer:
+    strategy: ddp
+    _target_: pytorch_lightning.Trainer
+    gpus:
+    - 0
+    - 1
+    benchmark: true
+    max_epochs: 100
+    limit_val_batches: 100
+    limit_train_batches: 1000
+    callbacks:
+    - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+      monitor: val.total.loss
+      save_top_k: 10
+      mode: max
+  loaders:
+    training:
+      _target_: torch.utils.data.DataLoader
+      dataset:
+        _target_: silk.datasets.sfm_kitti_mot.sfm_kitti_mot_dataset.kittiMOTdataset
+        root: /data/MOTkitti/formatted/train
+        train: true
+      num_workers: 24
+      batch_size: 1
+      collate_fn: ${mode.collate_fn}
+      persistent_workers: false
+    validation:
+      _target_: torch.utils.data.DataLoader
+      dataset:
+        _target_: silk.datasets.sfm_kitti_mot.sfm_kitti_mot_dataset.kittiMOTdataset
+        root: /data/MOTkitti/formatted/test
+        train: false
+      num_workers: 24
+      shuffle: false
+      batch_size: 1
+      collate_fn: ${mode.collate_fn}
+      persistent_workers: false
+  collate_fn:
+    _target_: silk.transforms.tensor.AutoBatch
+    transform:
+      _target_: silk.transforms.abstract.Compose
+      _args_:
+      - _target_: silk.transforms.abstract.Name
+        _args_:
+        - image_1
+        - image_2
+        - rel_pose
+        - intrinsics
+        - depth_map_1
+        - depth_map_2
+      - _target_: silk.transforms.abstract.Map
+        function:
+          _target_: silk.transforms.abstract.Compose
+          _args_:
+          - _target_: silk.transforms.tensor.ToTensor
+          - _target_: silk.transforms.cv.image.HWCToCHW

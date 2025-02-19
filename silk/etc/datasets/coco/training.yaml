@@ -1,0 +1,6 @@
+defaults:
+  - defaults
+  - _self_
+
+root: /data/COCO/train2017
+annFile: /data/COCO/annotations/captions_train2017.json
