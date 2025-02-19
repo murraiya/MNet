@@ -17,6 +17,7 @@ matcher = partial(
 
 
 class SIFT:
+    # same with silk, SIFT outputs yx(row col) coords
     def __init__(self, device) -> None:
         self._sift = cv.SIFT_create()
         self._device = device
@@ -26,7 +27,7 @@ class SIFT:
         images = images * 255
         images = images.permute(0, 2, 3, 1)
         images = images.to(torch.uint8)
-        images = images.numpy()
+        images = images.cpu().numpy()
 
         keypoints = []
         descriptors = []

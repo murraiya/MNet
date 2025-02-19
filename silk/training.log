@@ -1,0 +1,12 @@
+2025-02-19 08:39:59.350 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-19 08:39:59.351 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-19 08:40:02.346 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-19 08:42:02.619 | SUCCESS  | silk.cli:_main:95 - main dispatch successfully executed
+2025-02-19 08:42:02.620 | SUCCESS  | silk.cli:_main:99 - formatter successfully converted output
+2025-02-19 08:42:02.620 | SUCCESS  | silk.cli:_main:101 - ran successfully in working directory : .
+2025-02-19 08:45:33.969 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-19 08:45:33.969 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-19 08:45:36.969 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-19 08:45:52.938 | SUCCESS  | silk.cli:_main:95 - main dispatch successfully executed
+2025-02-19 08:45:52.939 | SUCCESS  | silk.cli:_main:99 - formatter successfully converted output
+2025-02-19 08:45:52.939 | SUCCESS  | silk.cli:_main:101 - ran successfully in working directory : .

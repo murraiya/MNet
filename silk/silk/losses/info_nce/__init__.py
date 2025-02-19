@@ -7,8 +7,6 @@
 import math
 from typing import Optional
 
-import jax
-
 import silk.losses.info_nce.loss as jax_loss
 import torch
 

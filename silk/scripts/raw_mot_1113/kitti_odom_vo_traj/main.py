@@ -36,23 +36,21 @@ def main(seq):
     print('{} files to test'.format(len(framework))) # 1591 files to test
     
     vo = VisualOdometry()
-    errors = np.zeros((len(framework), 2), np.float32)
-
 
     pred_array = np.zeros((len(framework), 12))
-    posehead_array = np.zeros((len(framework), 12))
     gt_array = np.zeros((len(framework), 12))
 
     gt_last_t = np.array([0,0,0])
     gt_last_R = np.array([[1,0,0],[0,1,0],[0,0,1]])
     
     pred_last_t = np.array([0,0,0])
-    pred_last_R = np.array([[1,0,0],[0,1,0],[0,0,1]])
-    
-    posehead_last_t = np.array([0,0,0], dtype=np.float64)
-    posehead_last_R = np.array([[1,0,0],[0,1,0],[0,0,1]], dtype=np.float64)
+    pred_last_R = np.array([[1,0,0],[0,1,0],[0,0,1]])    
+
+    sift_last_t = np.array([0,0,0])
+    sift_last_R = np.array([[1,0,0],[0,1,0],[0,0,1]])
 
     j=-1
+
     for sample in tqdm(framework): #2790 files to test
         j+=1
         
@@ -63,48 +61,59 @@ def main(seq):
         # print(Rt_cam2_gt) #4,4
         # gt_pose = sample['rel_pose'][1] # np.ndarray 4x4
         abs_gt = sample['abs_pose'] # [0], [1] np.ndarray 4x4 transformation mat
-        R_, t_ = vo.update(image, abs_gt, gt_pose, intrinsic)
+        R_, t_, R_sift, t_sift = vo.update(image, abs_gt, gt_pose, intrinsic)
         if j==0:
             silk_sjsj = np.concatenate([R_, t_], axis=1)
-            # silk_sj_posehead = np.concatenate([np.transpose(R), -np.linalg.transpose(R)@t], axis=1)
-            # silk_sj_posehead = np.concatenate([R, t], axis=1)
+            sift_T = np.concatenate([R_sift, t_sift], axis=1)
         else:
             silk_sjsj = np.concatenate([R_, t_], axis=1)
-            # silk_sj_posehead = np.concatenate([np.transpose(R), -np.transpose(pose6d[0]) @ (scale*pose6d[1])], axis=1)
-            # silk_sj_posehead = np.concatenate([R, t], axis=1)
+            sift_T = np.concatenate([R_sift, t_sift], axis=1)
+            
         
+        # pred_last_t = pred_last_t + pred_last_R @ silk_sjsj[:3,3]
+        # pred_last_R = pred_last_R @ (silk_sjsj[:3,:3])
+        # # print(pred_last_t)
+        # pred_x = pred_last_t[0]
+        # pred_y = pred_last_t[1]
+        # pred_z = pred_last_t[2]
+        # pred_mat = np.concatenate([pred_last_R, pred_last_t.reshape(3,1)], axis=1)
+        # # print(pred_mat.shape)
+        # # pred_mat = np.vstack([pred_mat, np.array([[0,0,0,1]])]) # make it 4x4
+        # pred_array[j] = pred_mat.reshape(-1) 
+        
+        # gt_last_t = gt_last_t + gt_last_R @ gt_pose[:3,3]
+        # gt_last_R = gt_last_R @ (gt_pose[:3,:3])
+        # gt_x = gt_last_t[0]
+        # gt_y = gt_last_t[1]
+        # gt_z = gt_last_t[2]
+        # gt_mat = np.concatenate([gt_last_R, gt_last_t.reshape(3,1)], axis=1)
+        # # print(gt_mat.shape)
+        # gt_array[j] = gt_mat.reshape(-1)
+
+        
+        
+        # # cv2.circle(traj, (int(posehead_y)+290, int(posehead_z)+200), 1, (0, 255, 0), 1) # green
+        # cv2.circle(traj, (int(pred_x)+290, int(pred_z)+200), 1, (255, 0, 0), 1) # blue
+        # cv2.circle(traj, (int(gt_x)+290, int(gt_z)+200), 1, (0, 0, 255), 1) # red BGR order
+        # cv2.imwrite('map.png'.format(seq), traj)
+
         pred_last_t = pred_last_t + pred_last_R @ silk_sjsj[:3,3]
         pred_last_R = pred_last_R @ (silk_sjsj[:3,:3])
-        # print(pred_last_t)
         pred_x = pred_last_t[0]
         pred_y = pred_last_t[1]
         pred_z = pred_last_t[2]
         pred_mat = np.concatenate([pred_last_R, pred_last_t.reshape(3,1)], axis=1)
-        # print(pred_mat.shape)
-        # pred_mat = np.vstack([pred_mat, np.array([[0,0,0,1]])]) # make it 4x4
         pred_array[j] = pred_mat.reshape(-1) 
         
-        # posehead_last_R = posehead_last_R @ np.linalg.inv(silk_sj_posehead[:3,:3])
-        # print("==============")
-        # print(posehead_last_R)
-        # posehead_last_t = posehead_last_t - posehead_last_R @ silk_sj_posehead[:3,3]
-        # print(posehead_last_t)
-        # posehead_x = posehead_last_t[0]
-        # posehead_y = posehead_last_t[1]
-        # posehead_z = posehead_last_t[2]
-        # posehead_mat = np.concatenate([posehead_last_R, posehead_last_t.reshape(3,1)], axis=1)
-        # print(posehead_mat.shape)
-        # # posehead_mat = np.vstack([posehead_mat, np.array([[0,0,0,1]])]) # make it 4x4
-        # posehead_array[j] = posehead_mat.reshape(-1) 
-
-        # posehead_last_t = posehead_last_t + posehead_last_R @ silk_sj_posehead[:3,3]
-        # posehead_last_R = posehead_last_R @ (silk_sj_posehead[:3,:3])
-        # posehead_x = posehead_last_t[0]
-        # posehead_y = posehead_last_t[1]
-        # posehead_z = posehead_last_t[2]
-        # posehead_mat = np.concatenate([posehead_last_R, posehead_last_t.reshape(3,1)], axis=1)
-        # # posehead_mat = np.vstack([posehead_mat, np.array([[0,0,0,1]])]) # make it 4x4
-        # posehead_array[j] = posehead_mat.reshape(-1) 
+        sift_last_t = sift_last_t + sift_last_R @ sift_T[:3,3]
+        sift_last_R = sift_last_R @ (sift_T[:3,:3])
+        sift_x = sift_last_t[0]
+        sift_y = sift_last_t[1]
+        sift_z = sift_last_t[2]
+        sift_mat = np.concatenate([sift_last_R, sift_last_t.reshape(3,1)], axis=1)
+        # sift_array[j] = pred_mat.reshape(-1) 
+        
+        
         
         gt_last_t = gt_last_t + gt_last_R @ gt_pose[:3,3]
         gt_last_R = gt_last_R @ (gt_pose[:3,:3])
@@ -112,15 +121,15 @@ def main(seq):
         gt_y = gt_last_t[1]
         gt_z = gt_last_t[2]
         gt_mat = np.concatenate([gt_last_R, gt_last_t.reshape(3,1)], axis=1)
-        # print(gt_mat.shape)
         gt_array[j] = gt_mat.reshape(-1)
-        
-        # cv2.circle(traj, (int(posehead_y)+290, int(posehead_z)+200), 1, (0, 255, 0), 1) # green
+
+        cv2.circle(traj, (int(sift_x)+290, int(sift_z)+200), 1, (0, 255, 0), 1) # green
         cv2.circle(traj, (int(pred_x)+290, int(pred_z)+200), 1, (255, 0, 0), 1) # blue
         cv2.circle(traj, (int(gt_x)+290, int(gt_z)+200), 1, (0, 0, 255), 1) # red BGR order
         cv2.imwrite('map.png'.format(seq), traj)
 
-    cv2.imwrite('/data/silkimpl/241113/mot_{:02}.png'.format(seq), traj)
+
+    cv2.imwrite('folder_for_viz/mot_{:02}.png'.format(seq), traj)
 
     # np.savetxt('/data/silkimpl/SiLKimpl_pose_2/ISAP_mot_{:02}.txt'.format(seq), pred_array[:-1])
     # np.savetxt('/data/silkimpl/SiLKimpl_pose_2/posehead_mot_{:02}.txt'.format(seq), posehead_array[:-1])

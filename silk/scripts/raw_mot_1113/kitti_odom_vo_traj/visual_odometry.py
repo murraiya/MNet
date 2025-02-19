@@ -9,6 +9,8 @@ from silk.backbones.silk.silk import from_feature_coords_to_image_coords, from_l
 from silk.cli.image_pair_visualization import create_img_pair_visual, save_image
 from geometry_utils import pose_vec2mat
 from silk.losses.sfmlearner.sfm_loss import pose_vec2mat
+from silk.models.sift import SIFT
+
 
 STAGE_SECOND_FRAME = 1
 STAGE_DEFAULT_FRAME = 2
@@ -26,16 +28,8 @@ class VisualOdometry:
 		self.frames_num = 0
 		self.silk_macthes_len = 0
 		self.silk_macthes_len = 0
-  
-	def relative_pose_cam_to_body(
-        self, relative_scene_pose
-	):
-		""" transform the camera pose from camera coordinate to body coordinate
-		"""
-		# return relative_scene_pose @ Rt_cam2_gt                
-		return np.linalg.inv(self.Rt_cam2_gt) @ relative_scene_pose @ self.Rt_cam2_gt
-        
-		
+		self.sift = SIFT("cuda:1")
+
 	def getAbsoluteScale(self, abs_gt):  #specialized for KITTI odometry dataset
 		last_gtX = abs_gt[1][0][3]
 		last_gtY = abs_gt[1][1][3]
@@ -48,19 +42,15 @@ class VisualOdometry:
 
 	@torch.no_grad
 	def processSecondFrame(self, img, rel_gt, abs_gt):
+		positions_sift, descriptors_sift = self.sift(img)
 		positions, descriptors = self.model(img)
-		# pose6d, positions, descriptors = self.model(img)
 				
 		positions = from_feature_coords_to_image_coords(self.model, positions)
-# 		print("==============")
-# 		print(type(pose6d))
-# 		print(len(positions), len(descriptors))
-# 		print(positions[0].shape, positions[1].shape, descriptors[0].shape, descriptors[1].shape)
-# torch.Size([3001, 3]) torch.Size([3001, 3]) torch.Size([3001, 128]) torch.Size([3001, 128])
 
 		positions_1, positions_2 = positions[0], positions[1]
 		
 		matches, dist = SILK_MATCHER(descriptors[0], descriptors[1])
+		matches_sift, dist_sift = SILK_MATCHER(descriptors_sift[0], descriptors_sift[1])
   
 		self.frames_num+=1
 		self.silk_macthes_len+=len(matches)
@@ -74,58 +64,40 @@ class VisualOdometry:
 			positions_1[matches[:, 0]].detach().cpu().numpy()[:, [1,0]],
 			focal=self.focal, pp = self.pp)
 		
-		self.rel_gt = rel_gt #4x4 ndarray
+		E, mask = cv2.findEssentialMat(
+			positions_sift[1][matches_sift[:, 1]].detach().cpu().numpy()[:, [1,0]],
+			positions_sift[0][matches_sift[:, 0]].detach().cpu().numpy()[:, [1,0]],
+            focal=self.focal, pp=self.pp, method=cv2.RANSAC, prob=0.999, threshold=1.0)
+		_, R_sift, t_sift, mask = cv2.recoverPose(E, 
+   			positions_sift[1][matches_sift[:, 1]].detach().cpu().numpy()[:, [1,0]],
+			positions_sift[0][matches_sift[:, 0]].detach().cpu().numpy()[:, [1,0]],
+			focal=self.focal, pp = self.pp)
+		
+		
+
 		self.frame_stage = STAGE_DEFAULT_FRAME 
 		absolute_scale = self.getAbsoluteScale(abs_gt)
 		
-		R_ = (R).copy()
-		t_ = (absolute_scale*t).copy()
-
-		# pose6d = pose6d[:1, :, :][0] # pose6d of non-warped image, should be (1, 1, 6)
-		
-		# pose_mat = pose_vec2mat(pose6d, rotation_mode="euler")[0] #3x4
-		# R = pose_mat[:3,:3].cpu().numpy()
-		# t = pose_mat[:3, 3].unsqueeze(1).cpu().numpy()
-		
-		# curr_scale = np.sqrt(np.sum(t**2))
-		# scale_factor = np.sum(gt[:,-1] * pred[:,-1])/np.sum(pred[:,-1] ** 2)
-		# R__ = R.copy()
-		# t__ = ((absolute_scale/curr_scale)*t).copy()
-		
-		return R_, t_ #, R__, t__
+		return R, absolute_scale*t, R_sift, absolute_scale*t_sift
 
 
 	@torch.no_grad
 	def processFrame(self, img, rel_gt, abs_gt):
+		positions_sift, descriptors_sift = self.sift(img)
 		positions, descriptors = self.model(img)
-		# pose6d, positions, descriptors = self.model(img)
-				
+		print("sift number", len(positions_sift), len(positions_sift[0]))
 		positions = from_feature_coords_to_image_coords(self.model, positions)
-# 		print("==============")
-# 		print(type(pose6d))
-		print(positions[0].shape, descriptors[0].shape)
-		# torch.Size([3001, 3]) torch.Size([3001, 128])
-		# this aligns
-  
-# 		print(positions[0].shape, positions[1].shape, descriptors[0].shape, descriptors[1].shape)
-# torch.Size([3001, 3]) torch.Size([3001, 3]) torch.Size([3001, 128]) torch.Size([3001, 128])
-
 		positions_1, positions_2 = positions[0], positions[1]
 		
 		matches, dist = SILK_MATCHER(descriptors[0], descriptors[1])
-  
-  		# print(dist[:10])
-		# print(dist[300:310])
-		# print(max(dist))#-0.4658,
-		# print(min(dist))#-0.9875,
-		# print("len(matches) ", len(matches))
+		matches_sift, dist_sift = SILK_MATCHER(descriptors_sift[0], descriptors_sift[1])
+
 		self.frames_num+=1
 		self.silk_macthes_len+=len(matches)
 
 		E, mask_ = cv2.findEssentialMat(
 			positions_2[matches[:, 1]].detach().cpu().numpy()[:, [1,0]],
 			positions_1[matches[:, 0]].detach().cpu().numpy()[:, [1,0]],
-            # focal=self.focal, pp=self.pp)
             focal=self.focal, pp=self.pp, method=cv2.RANSAC, prob=0.999, threshold=1.0)
 		if(E.shape[0]>3):
 			E = E[:3]
@@ -134,21 +106,26 @@ class VisualOdometry:
 			positions_1[matches[:, 0]].detach().cpu().numpy()[:, [1,0]],
 			focal=self.focal, pp = self.pp)
 		
+		E, mask = cv2.findEssentialMat(
+			positions_sift[1][matches_sift[:, 1]].detach().cpu().numpy()[:, [1,0]],
+			positions_sift[0][matches_sift[:, 0]].detach().cpu().numpy()[:, [1,0]],
+            focal=self.focal, pp=self.pp, method=cv2.RANSAC, prob=0.999, threshold=1.0)
+		_, R_sift, t_sift, mask = cv2.recoverPose(E, 
+   			positions_sift[1][matches_sift[:, 1]].detach().cpu().numpy()[:, [1,0]],
+			positions_sift[0][matches_sift[:, 0]].detach().cpu().numpy()[:, [1,0]],
+			focal=self.focal, pp = self.pp)
+
 		absolute_scale = self.getAbsoluteScale(abs_gt)
 		
 
 		R_=R.copy()
 		t_=(absolute_scale*R@t).copy()
-		
-		# pose6d = pose6d[:1, :, :][0] # pose6d of non-warped image, should be (1, 1, 6)
-		# pose_mat = pose_vec2mat(pose6d, rotation_mode="euler")[0] #3x4
-		# R = pose_mat[:3,:3].cpu().numpy()
-		# t = pose_mat[:3, 3].unsqueeze(1).cpu().numpy()
-		# curr_scale = np.sqrt(np.sum(t**2))
-		# R__ = R.copy()
-		# t__ = ((absolute_scale/curr_scale)* R @ t).copy()
 
-		return R_, t_ #, R__, t__
+		R_sift_ = R_sift.copy()
+		t_sift_ = absolute_scale*R_sift@t_sift
+		
+
+		return R_, t_, R_sift_, t_sift_
 
 	def update(self, img, abs_gt, rel_gt, intrinsics):
 		self.focal = (float(intrinsics[0,0]) + float(intrinsics[1,1])) / 2
@@ -157,10 +134,10 @@ class VisualOdometry:
 		# print(self.abs_gt[0].shape)
 
 		if(self.frame_stage == STAGE_DEFAULT_FRAME):
-			R_, t_ = self.processFrame(img, rel_gt, abs_gt)
+			R_, t_, R_sift, t_sift = self.processFrame(img, rel_gt, abs_gt)
 		elif(self.frame_stage == STAGE_SECOND_FRAME):
-			R_, t_ = self.processSecondFrame(img, rel_gt, abs_gt)
-		return R_, t_, #R, t
+			R_, t_, R_sift, t_sift = self.processSecondFrame(img, rel_gt, abs_gt)
+		return R_, t_, R_sift, t_sift 
    
 
 

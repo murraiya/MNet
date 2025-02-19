@@ -44,11 +44,13 @@ def double_softmax_distance(desc_0, desc_1, temperature=1.0):
 def match_descriptors(
     distances,
     max_distance=torch.inf,
-    cross_check=True,
+    cross_check=False,
     max_ratio=1.0,
 ):
     indices1 = torch.arange(distances.shape[0], device=distances.device)
+    # print(distances.shape) #torch.Size([7001, 7001])
     indices2 = torch.argmin(distances, dim=1)
+    # print(indices2.shape) #torch.Size([7001])
 
     if cross_check:
         matches1 = torch.argmin(distances, dim=0)
@@ -96,6 +98,7 @@ def mutual_nearest_neighbor(
     match_fn=match_descriptors,
     return_distances=False,
 ):
+
     dist = distance_fn(desc_0, desc_1)
     matches = match_fn(dist)
     if return_distances:

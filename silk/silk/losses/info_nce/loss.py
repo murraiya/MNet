@@ -511,6 +511,7 @@ def total_loss(
         # but original was float32, int32, float32
         
     # info nce loss
+    # L_desc
     loss_0 = sym_corr_cross_entropy(
         lse_0,
         lse_1,
@@ -522,6 +523,7 @@ def total_loss(
     )
 
     # matching loss
+    # L_key
     loss_1, precision, recall = corr_matching_binary_cross_entropy(
         argmax_0.unsqueeze(0),
         argmax_1.unsqueeze(0),

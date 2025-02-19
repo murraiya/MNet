@@ -7,7 +7,6 @@
 from functools import partial
 from typing import Any, Dict, Optional, Union
 from PIL import Image
-from torchvision.utils import save_image
 
 import cv2
 import pytorch_lightning as pl
