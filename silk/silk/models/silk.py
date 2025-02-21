@@ -8,6 +8,7 @@ from functools import partial
 from typing import Any, Dict, Optional, Union
 from PIL import Image
 
+import math
 import cv2
 import pytorch_lightning as pl
 import torch
@@ -232,13 +233,6 @@ class SiLKBase(
             self._grayify,
             f"augmented_images",
         )
-        # self.flow.define_transition(
-        #     ("descriptors", "logits", "pose6d", "depth_maps", "sparse_positions", "sparse_descriptors"),
-        #     self._model.forward_flow,
-        #     # images="gray_images",
-        #     outputs=Flow.Constant(("normalized_descriptors", "logits", "pose6d", "depth_maps", "sparse_positions", "sparse_descriptors")),
-        #     images = "gray_images",
-        # )
         self.flow.define_transition(
             ("descriptors", "logits", "sparse_positions", "sparse_descriptors", "nms"),
             self._model.forward_flow,
@@ -489,11 +483,10 @@ class SiLKBase(
         self._loss_fn(
             batch, use_image_aug
         )
-        # print("nan check")
         # if math.isnan(actx_desc_loss):
         #     print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        # if math.isnan(actx_desc_loss):
-        #     print("ctx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        # if math.isnan(keypt_loss):
+        #     print("keypt loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         
         # f1 = (2 * precision * recall) / (precision + recall)
 

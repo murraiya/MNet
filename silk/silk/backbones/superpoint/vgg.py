@@ -285,46 +285,12 @@ class ParametricVGG(torch.nn.Module, CoordinateMappingProvider):
     def forward(self, images: torch.Tensor) -> torch.Tensor:
         # in vgg.py forward  torch.Size([2, 1, 128, 416])
         
-        print("self.training")
-        print(self.training)
-        
-        
-        # print(images.requires_grad)
         x = images
         for layer in self.layers[:-1]:
             x = layer(x)
-            # print("2")
-            # print(x.requires_grad)
             x = self.mp(x)
+
         x = self.layers[-1](x)
 
-        # print("3")
-        # print(x.requires_grad)
-        
-        # self.training
-        # False
-        # 1
-        # False
-        # 2
-        # False
-        # 2
-        # False
-        # 2
-        # False
-        # 3
-        # False
-
-        # self.training
-        # True
-        # 1
-        # False
-        # 2
-        # True
-        # 2
-        # True
-        # 2
-        # True
-        # 3
-        # True
 
         return x

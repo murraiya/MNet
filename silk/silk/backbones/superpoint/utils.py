@@ -13,6 +13,7 @@ from typing import Iterable, Tuple, Union
 
 import torch
 import torch.nn.functional as F
+import skimage.io as io
 
 
 def logits_to_prob(logits: torch.Tensor, channel_dim: int = 1) -> torch.Tensor:
@@ -62,8 +63,9 @@ def depth_to_space(
         image_probs (tensor): the reshaped tensor where each image in the batch
             is shaped in a tensor of size 1 x H x W
     """
-    
-    # print(prob.requires_grad)
+    # print(prob.shape)
+    # torch.Size([2, 1, 357, 1224])
+
     if cell_size > 1:
         assert prob.shape[channel_dim] == cell_size * cell_size + 1
 
@@ -72,11 +74,17 @@ def depth_to_space(
 
         # change the dimensions to get an output shape of (batch_size, H, W)
         image_probs = F.pixel_shuffle(prob, cell_size)
+        print("in if")
     else:
         assert prob.shape[channel_dim] == 1
         image_probs = prob
+        # here we are. 
+        # no changes 
 
-    # print(image_probs.requires_grad)
+
+    # print(image_probs.shape)
+    # torch.Size([2, 1, 357, 1224])
+
     return image_probs
 
 
@@ -88,6 +96,8 @@ def prob_map_to_points_map(
     use_fast_nms: bool = True,
     top_k: int = None,
 ):
+    # sigmoid (logit) came into here 
+
     prob_map = remove_border_points(prob_map, border_dist=border_dist)
 
     prob_map = prob_map.squeeze(dim=1)
@@ -95,20 +105,27 @@ def prob_map_to_points_map(
     prob_thresh = torch.tensor(prob_thresh, device=prob_map.device)
     prob_thresh = prob_thresh.unsqueeze(0)
 
+    # io.imsave("folder_for_viz/prob_to_map_0.png", prob_map[0].unsqueeze(2).cpu().numpy())
+
     if use_fast_nms:
+        # print("in if", nms_dist)
         # add missing channel
         prob_map = prob_map.unsqueeze(1)
         nms = fast_nms(prob_map, nms_dist=nms_dist)
         # remove added channel
         prob_map = nms.squeeze(1)
     else:
+        # print("in else", nms_dist)
         # Original Implementation
         # NMS only runs one image at a time, so go through each elem in the batch
         prob_map = torch.stack(
             [original_nms(image, nms_dist=nms_dist) for image in prob_map]
         )
 
+    # io.imsave("folder_for_viz/prob_to_map_1.png", prob_map[0].unsqueeze(2).cpu().numpy())
+
     if top_k:
+        # print("top_k")
         if top_k >= prob_map.shape[-1] * prob_map.shape[-2]:
             top_k_threshold = torch.zeros_like(prob_thresh)
         else:
@@ -120,29 +137,37 @@ def prob_map_to_points_map(
                 reshaped_prob_map[0].size()[0] - top_k - 1
             ) / reshaped_prob_map[0].size()[0]
             
-
-            print(prob_map.dtype)
-            print(reshaped_prob_map.dtype)
-            print(top_k_percentile.dtype)
-            # torch.float16
-            # torch.float16
-            # torch.float32
             reshaped_prob_map = reshaped_prob_map.to(top_k_percentile.dtype)   
-            #this should be torch.float32     
             top_k_threshold = reshaped_prob_map.quantile(
                 top_k_percentile,
+                # 0.95,
                 dim=1,
                 interpolation="midpoint",
             )
+            
         prob_thresh = torch.minimum(top_k_threshold, prob_thresh)
         prob_thresh = prob_thresh.unsqueeze(-1).unsqueeze(-1)
 
+    # print(prob_map.shape)
+    # torch.Size([2, 357, 1224])
+    # io.imsave("folder_for_viz/prob_to_map_2.png", prob_map[0].unsqueeze(2).cpu().numpy())
+    # prob map is still sigmoid(logit) here. 
+
+    # print("0 ", prob_map.requires_grad)
     # only take points with probability above the probability threshold
     prob_map = torch.where(
         prob_map > prob_thresh,
         prob_map,
         torch.tensor(0.0, device=prob_map.device),
     )
+
+    # print("1 ", prob_map.requires_grad)
+    # print(prob_map.shape)
+    # torch.Size([2, 357, 1224])
+
+    # io.imsave("folder_for_viz/prob_to_map_3.png", prob_map[0].unsqueeze(2).cpu().numpy())
+    # changes here
+    # exit(0)
 
     return prob_map # batch_output
 
@@ -364,6 +389,7 @@ def space_to_depth(prob: torch.Tensor, cell_size: int = 8) -> torch.Tensor:
             (batch x (cell_size^2 + 1) x (height/cell_size) x (width/cell_size)).
             The sum of probabilities per cell could be higher than one.
     """
+
     prob = torch.nn.functional.pixel_unshuffle(prob, cell_size)
     prob_sum = torch.sum(prob, dim=1, keepdim=True)
     dustbin = torch.clamp_min(
@@ -479,11 +505,15 @@ def prob_map_to_positions_with_prob(
         Tuple of positions (with probability) tensors of size P x 3 (x, y and prob).
     """
     prob_map = prob_map.squeeze(dim=1)
+    # print("2 ", prob_map.requires_grad)
+
     # print(prob_map.requires_grad)
     positions = tuple(
         torch.nonzero(prob_map[i] > threshold).float() + 0.5
         for i in range(prob_map.shape[0])
     )
+    # print("3 ", positions[0].requires_grad) False 
+
     prob = tuple(
         prob_map[i][torch.nonzero(prob_map[i] > threshold, as_tuple=True)][:, None]
         for i in range(prob_map.shape[0])
@@ -496,5 +526,5 @@ def prob_map_to_positions_with_prob(
     positions_with_prob = tuple(
         torch.cat((pos, prob), dim=1) for pos, prob in zip(positions, prob)
     )
-    # print(positions_with_prob[0].requires_grad)
+    # print("4_ ", positions_with_prob[0].requires_grad) True
     return positions_with_prob, top_K_mask

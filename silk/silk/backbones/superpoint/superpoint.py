@@ -62,8 +62,7 @@ class DescriptorHead(torch.nn.Module, CoordinateMappingProvider):
     def forward(self, x: torch.Tensor):
         x = self._desH1(x)
         x = self._desH2(x)
-        print("descriptor head", x.shape)
-        print(x.dtype)
+
         return x
 
 
@@ -157,14 +156,13 @@ class SuperPoint(AutoForward, torch.nn.Module):
     @staticmethod
     def normalize_descriptors(raw_descriptors, scale_factor=1.0, normalize=True):
         # print(raw_descriptors.requires_grad)
-        print(raw_descriptors.dtype)
+        
         if normalize:
             return scale_factor * F.normalize(
                 raw_descriptors,
                 p=2,
                 dim=1,
             )  # L2 normalization
-        print(raw_descriptors.dtype)
         return scale_factor * raw_descriptors
 
     @staticmethod

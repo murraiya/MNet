@@ -248,7 +248,6 @@ class SiLKVGG(SiLKBase):
         MagicPoint.add_detector_head_post_processing(
             self.flow,
             "logits",
-            prefix="",
             cell_size=1,
             detection_threshold=detection_threshold,
             detection_top_k=detection_top_k,
@@ -259,22 +258,9 @@ class SiLKVGG(SiLKBase):
             self.flow,
             input_name="images",
             descriptor_head_output_name="raw_descriptors",
-            prefix="",
             scale_factor=self.descriptor_scale_factor,
             normalize_descriptors=normalize_descriptors,
         )
-        # SiLKVGG.add_pose_head_post_processing(
-        #     self.flow,
-        #     pose_head_output_name="pose_head_feature",
-        #     pose_name="pose6d",
-        #     prefix="",
-        # )
-        # SiLKVGG.add_disp_head_post_processing(
-        #     self.flow,
-        #     disp_head_output_name="disp_maps",
-        #     name = "depth_maps",
-        # )
-
 
 
     @staticmethod
@@ -309,13 +295,11 @@ class SiLKVGG(SiLKBase):
         flow: Flow,
         input_name: str, # = "images",
         descriptor_head_output_name: str = "raw_descriptors",
-        positions_name: str = "positions",
-        prefix: str = "superpoint.",
         scale_factor: float = 1.0,
         normalize_descriptors: bool = True,
     ):
         flow.define_transition(
-            f"{prefix}normalized_descriptors",
+            "normalized_descriptors",
             partial(
                 SuperPoint.normalize_descriptors,
                 scale_factor=scale_factor,
@@ -324,30 +308,30 @@ class SiLKVGG(SiLKBase):
             descriptor_head_output_name,
         )
         flow.define_transition(
-            f"{prefix}dense_descriptors",
+            "dense_descriptors",
             SiLKVGG.get_dense_descriptors,
-            f"{prefix}normalized_descriptors",
+            "normalized_descriptors",
         )
-        flow.define_transition(f"{prefix}image_size", SuperPoint.image_size, input_name)
+        flow.define_transition("image_size", SuperPoint.image_size, input_name)
         flow.define_transition(
-            f"{prefix}sparse_descriptors",
+            "sparse_descriptors", #grad o. but not sure validity for loss. there was indexing process.
             partial(
                 SiLKVGG.sparsify_descriptors,
                 scale_factor=scale_factor,
                 normalize_descriptors=normalize_descriptors,
             ),
             descriptor_head_output_name,
-            f"positions",
+            "positions", # pos + prob: pos has no gradient 
         )
         flow.define_transition(
-            f"{prefix}sparse_positions",
+            "sparse_positions",
             lambda x: x,
-            f"positions",
+            "positions",
         )
         flow.define_transition(
-            f"{prefix}dense_positions",
+            "dense_positions",
             SiLKVGG.get_dense_positions,
-            f"probability",
+            "probability",
         )
 
     @staticmethod
@@ -383,12 +367,15 @@ class SiLKVGG(SiLKBase):
         scale_factor: float = 1.0,
         normalize_descriptors: bool = True,
     ):
+        # print("4 ", raw_descriptors.requires_grad) T
+
         sparse_descriptors = []
         for i, pos in enumerate(positions):
             pos = pos[:, :2]
             pos = pos.floor().long()
 
             descriptors = raw_descriptors[i, :, pos[:, 0], pos[:, 1]].T
+            # print("5_ ", descriptors.requires_grad) True 
 
             # L2 normalize the descriptors
             descriptors = SuperPoint.normalize_descriptors(
@@ -398,5 +385,7 @@ class SiLKVGG(SiLKBase):
             )
 
             sparse_descriptors.append(descriptors)
+        # print("5 ", sparse_descriptors[0].requires_grad) True
+
         return tuple(sparse_descriptors)
 

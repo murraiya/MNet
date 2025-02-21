@@ -192,8 +192,6 @@ class MagicPoint(AutoForward, torch.nn.Module):
     def add_detector_head_post_processing(
         flow: Flow,
         detector_head_output_name: str = "logits",
-        prefix: str = "magicpoint.",
-        postfix: str = "",
         cell_size: int = 8,
         detection_threshold=0.015,
         detection_top_k=None,
@@ -201,17 +199,17 @@ class MagicPoint(AutoForward, torch.nn.Module):
         border_dist=4,
     ):
         flow.define_transition(
-            f"{prefix}probability{postfix}",
+            "probability",
             logits_to_prob,
             detector_head_output_name,
         )
         flow.define_transition(
-            f"{prefix}score{postfix}",
+            "score",
             partial(depth_to_space, cell_size=cell_size),
-            f"{prefix}probability{postfix}",
+            "probability",
         )
         flow.define_transition(
-            f"{prefix}nms{postfix}",
+            "nms", #nms grad o, but there was suppressing. dont know if it is valid for loss 
             partial(
                 prob_map_to_points_map,
                 prob_thresh=detection_threshold,
@@ -219,10 +217,10 @@ class MagicPoint(AutoForward, torch.nn.Module):
                 border_dist=border_dist,
                 top_k=detection_top_k,
             ),
-            f"{prefix}score{postfix}",
+            "score",
         )
         flow.define_transition(
-            (f"{prefix}positions{postfix}", "sparse_mask"),
+            ("positions", "sparse_mask"), #positions: pos + prob, no grad on pos, grad on prob. 
             prob_map_to_positions_with_prob,
-            f"{prefix}nms{postfix}",
+            "nms",
         )
