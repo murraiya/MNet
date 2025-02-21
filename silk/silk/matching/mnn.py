@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from silk.logger import LOG
 
 
-def compute_dist(desc_0, desc_1, dist_type="dot"):
+def compute_dist(desc_0, desc_1, dist_type="cosine"):
     assert dist_type in {"dot", "cosine", "l2"}
 
     if dist_type == "dot":
@@ -44,7 +44,7 @@ def double_softmax_distance(desc_0, desc_1, temperature=1.0):
 def match_descriptors(
     distances,
     max_distance=torch.inf,
-    cross_check=False,
+    cross_check=True,
     max_ratio=1.0,
 ):
     indices1 = torch.arange(distances.shape[0], device=distances.device)

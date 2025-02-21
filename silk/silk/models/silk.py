@@ -37,6 +37,8 @@ from silk.models.abstract import OptimizersHandler, StateDictRedirect
 from silk.transforms.abstract import MixedModuleDict, NamedContext, Transform
 from silk.transforms.tensor import NormalizeRange
 from torchvision.transforms import Grayscale
+from silk.models.sift import SIFT
+
 
 _DEBUG_MODE_ENABLED = True
 
@@ -116,6 +118,7 @@ class SiLKBase(
         AutoForward.__init__(self, Flow("batch", "use_image_aug"), "loss")
 
         self._model = model 
+        self._sift = SIFT("cuda:1")
         self._loss = loss
         #silk.backbones.silk.silk.SiLKVGG (backbone = silk.backbones.superpoint.vgg.ParametricVGG)
         self._contextualizer = contextualizer
@@ -123,26 +126,32 @@ class SiLKBase(
             self._pe = PositionEncodingSine(256, max_shape=(512, 512))
         self._image_aug_transform = image_aug_transform
 
-    # def from_feature_coords_to_image_coords(model, desc_positions):
-    #     if isinstance(desc_positions, tuple):
-    #         return tuple(
-    #             from_feature_coords_to_image_coords(
-    #                 model,
-    #                 dp,
-    #             )
-    #             for dp in desc_positions
-    #         )
-    #     coord_mapping = model.coordinate_mapping_composer.get("images", "raw_descriptors")
-    #     desc_positions = torch.cat(
-    #         [
-    #             coord_mapping.reverse(desc_positions[..., :2]),
-    #             desc_positions[..., 2:],
-    #         ],
-    #         dim=-1,
-    #     )
+    # def processFrame(self, img, rel_gt, abs_gt):
+    #     positions_sift, descriptors_sift = self.sift(img)
+    #     print("sift number", len(positions_sift), len(positions_sift[0]))
+    #     matches_sift, dist_sift = SILK_MATCHER(descriptors_sift[0], descriptors_sift[1])
 
-    # return desc_positions
+    #     E, mask = cv2.findEssentialMat(
+	# 		positions_sift[1][matches_sift[:, 1]].detach().cpu().numpy()[:, [1,0]],
+	# 		positions_sift[0][matches_sift[:, 0]].detach().cpu().numpy()[:, [1,0]],
+    #         focal=self.focal, pp=self.pp, method=cv2.RANSAC, prob=0.999, threshold=1.0)
+    #     _, R_sift, t_sift, mask = cv2.recoverPose(E, 
+   	# 		positions_sift[1][matches_sift[:, 1]].detach().cpu().numpy()[:, [1,0]],
+	# 		positions_sift[0][matches_sift[:, 0]].detach().cpu().numpy()[:, [1,0]],
+	# 		focal=self.focal, pp = self.pp)
 
+	# 	absolute_scale = self.getAbsoluteScale(abs_gt)
+		
+
+	# 	R_=R.copy()
+	# 	t_=(absolute_scale*R@t).copy()
+
+	# 	R_sift_ = R_sift.copy()
+	# 	t_sift_ = absolute_scale*R_sift@t_sift
+		
+
+	# 	return R_, t_, R_sift_, t_sift_
+    
     @property
     def coordinate_mapping_composer(self):
         return self._model.coordinate_mapping_composer
