@@ -398,7 +398,7 @@ class HomographicSampler:
             flatmat = [_1, _0, _0, _0, +cos_a, +sin_a, _0, -sin_a, +cos_a]
 
         rot_matrix = torch.cat(flatmat, dim=-1)
-        rot_matrix = rot_matrix.view(self.batch_size, 3, 3)
+        rot_matrix = rot_matrix.view(self.batch_size, 3, 3).contiguous()
 
         self._clear_cache()
 
@@ -478,84 +478,108 @@ class HomographicSampler:
         cam_coords = (intrinsics_inv @ current_pixel_coords)
         # print("in pixel2cam", cam_coords.shape, depth.shape)
         # ([1, 3, 21316]) torch.Size([1, 376, 1241])
+        # ([1, 3, 21316]) torch.Size([1, 1200, 1920])
+
         # print(depth.shape, shape)
         # torch.Size([1, 376, 1241]) (tensor([3]), tensor([376]), tensor([1241]))
+        # torch.Size([1, 1200, 1920]) (tensor([3]), tensor([1200]), tensor([1920]))
 
         
+        # #########################################
+        # ### grid sample depth 
+        # points_ = points[:,:2,:].permute(0,2,1).double()
+        # # print(points_.shape)
+        # # torch.Size([1, 43780, 2])
+        # # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
+
+        # print(shape)
+        # print(depth.shape)
+        # # torch.Size([1, 3, 370, 1226])
+        # # torch.Size([1, 370, 1226])
+
+        # # normalize bf grid sample
+        # #shape: c, h, w
+        # h = shape[2]
+        # w = shape[]
+        # points_[:,:,0] = points_[:,:,0]/(shape[2]/2) - 1
+        # points_[:,:,1] = points_[:,:,1]/(shape[1]/2) - 1
+        
+        # # print(shape[2], shape[1])
+        # # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
+        # # tensor(-0.7365, device='cuda:1') tensor(3.9441, device='cuda:1') tensor(-0.5028, device='cuda:1') tensor(4.7154, device='cuda:1')
+
+        # print(depth.dtype, points_.dtype)
+        # # torch.float32 torch.float32
+        # # fuck x,y matters
+        # if depth.reshape(-1).shape != points.reshape(-1).shape:
+        #     depth = grid_sample(depth.unsqueeze(0), points_.unsqueeze(0), align_corners=False, mode="nearest")        
+            
+        # depth_ = depth.reshape(1, -1).unsqueeze(0)
+        # print("!!!!!!!!!!!!!!!")
+        # print(depth_.shape)
+        # # torch.Size([1, 1, 21316])
+        # # torch.Size([1, 1, 3495824]) ..?
+
+        # # when get_corr
+        
+        # # print(cam_coords.shape)
+        # # print(depth_.shape, min(depth_[0,0]), max(depth_[0,0]))
+
+
         #########################################
-        ### grid sample depth 
-        points_ = points[:,:2,:].permute(0,2,1)
+        ### just getting depth 
+        # points_ = points[:,:2,:].permute(0,2,1).double()
         # print(points_.shape)
         # torch.Size([1, 43780, 2])
         # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
-        
-        # normalize bf grid sample
-        #shape: c, h, w
-        points_[:,:,0] = points_[:,:,0]/(shape[2].to("cuda:1")/2) - 1
-        points_[:,:,1] = points_[:,:,1]/(shape[1].to("cuda:1")/2) - 1
-        
-        # print(shape[2], shape[1])
-        # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
-        # tensor(-0.7365, device='cuda:1') tensor(3.9441, device='cuda:1') tensor(-0.5028, device='cuda:1') tensor(4.7154, device='cuda:1')
+        # tensor(9.5000, device='cuda:1', dtype=torch.float64) tensor(9.5000, device='cuda:1', dtype=torch.float64) 
+        # tensor(1216.5000, device='cuda:1', dtype=torch.float64) tensor(360.5000, device='cuda:1', dtype=torch.float64)
 
-        # fuck x,y matters
-        if depth.reshape(-1).shape != points.reshape(-1).shape:
-            depth = grid_sample(depth.unsqueeze(0), points_.unsqueeze(0).double(), align_corners=False, mode="nearest")        
+
+        # print(shape)
+        # print(depth.shape)
+        # torch.Size([1, 3, 370, 1226])
+        # torch.Size([1, 370, 1226])
+
+        # depth_points_x_start = torch.floor(min(points[0,0,:])).to(torch.int)
+        # depth_points_x_end = torch.floor(max(points[0,0,:])).to(torch.int)
+        # depth_points_y_start = torch.floor(min(points[0,1,:])).to(torch.int)
+        # depth_points_y_end = torch.floor(max(points[0,1,:])).to(torch.int)
+        depth_points_x_start = torch.floor(points[0,0,0]).to(torch.int)
+        depth_points_x_end = torch.floor(points[0,0,-1]).to(torch.int) + 1
+        depth_points_y_start = torch.floor(points[0,1,0]).to(torch.int)
+        depth_points_y_end = torch.floor(points[0,1,-1]).to(torch.int) + 1
         
+        # print(depth_points_x_start, depth_points_x_end, depth_points_y_start, depth_points_y_end)
+        # tensor(9, device='cuda:1', dtype=torch.int32) tensor(1216, device='cuda:1', dtype=torch.int32) tensor(9, device='cuda:1', dtype=torch.int32) tensor(360, device='cuda:1', dtype=torch.int32)
+        
+
+        depth = depth[:, depth_points_y_start:depth_points_y_end, depth_points_x_start:depth_points_x_end]
+        # print(depth.shape)
+        # torch.Size([1, 352, 1208])
         depth_ = depth.reshape(1, -1).unsqueeze(0)
-        # print(cam_coords.shape)
-        # print(depth_.shape, min(depth_[0,0]), max(depth_[0,0]))
+        # print(depth_.shape)
+        # torch.Size([1, 1, 425216])
 
-        mask_ = torch.where(depth_>0.03, depth_, 0)
+
+
+        mask_ = torch.where(depth_>0.003, depth_, 0)
         # print(mask_.shape)
         # # torch.Size([1, 1, 21316])
-        mask_tmp = torch.where(depth_>0.03, depth_, 1)
+        mask_tmp = torch.where(depth_>0.003, depth_, 1)
         mask = torch.cat([mask_, mask_, mask_tmp], dim =1)
-        # print(mask.shape)
-        # # torch.Size([1, 3, 21316])
+        # print(mask.shape, cam_coords.shape)
+        # torch.Size([1, 3, 425216]) torch.Size([1, 3, 425216])
         
         cam_coords = mask * cam_coords # elementwise mult
-        # print(cam_coords[:,:,349:1360])
-        # print("-------------------out pixel2cam")
+        # print(cam_coords.shape) torch.Size([1, 3, 425216])
+
         return cam_coords #, mask_.reshape(shape)
 
 
 
-    @staticmethod
-    def cam2pixel(cam_coords, proj_c2p_rot, proj_c2p_tr, normalize:bool = False):
-        """Transform coordinates in the camera frame to the pixel frame.
-        Args:
-            cam_coords: pixel coordinates defined in the first camera coordinates system -- [B, 4, H, W]
-            proj_c2p_rot: rotation matrix of cameras -- [B, 3, 4]
-            proj_c2p_tr: translation vectors of cameras -- [B, 3, 1]
-        Returns:
-            array of [-1,1] coordinates -- [B, 2, H, W]
-        """
-        # b, _, h, w = cam_coords.size()
-        cam_coords_flat = cam_coords.reshape(1, 3, -1)  # [B, 3, H*W]
-        if proj_c2p_rot is not None:
-            pcoords = proj_c2p_rot @ cam_coords_flat
-        else:
-            pcoords = cam_coords_flat
-
-        if proj_c2p_tr is not None:
-            pcoords = pcoords + proj_c2p_tr  # [B, 3, H*W]
-        X = pcoords[:, 0]
-        Y = pcoords[:, 1]
-        Z = pcoords[:, 2].clamp(min=1e-3)
-
-        if normalize:
-            X_norm = 2*(X / Z)/(416-1) - 1  # Normalized, -1 if on extreme left, 1 if on extreme right (x = w-1) [B, H*W]
-            Y_norm = 2*(Y / Z)/(128-1) - 1  # Idem [B, H*W]
-        
-            pixel_coords = torch.stack([X_norm, Y_norm], dim=2)  # [B, H*W, 2]
-            return pixel_coords
-        else:
-            return torch.stack([X/Z, Y/Z], dim=2)#pixel_coords#.reshape(b, h, w, 2)
-
-
     @staticmethod #cam_coords, pose_mat, intrinsics, normalize
-    def cam2pixel_forward(cam_coords, pose_mat, intrinsics, normalize:bool = False):
+    def cam2pixel_forward(cam_coords, pose_mat, intrinsics, normalize:bool = False, shape=None):
         """Transform coordinates in the camera frame to the pixel frame.
         Args:
             cam_coords: pixel coordinates defined in the first camera coordinates system -- [B, 4, H, W]
@@ -585,14 +609,26 @@ class HomographicSampler:
         Y = pcoords[:, 1]
         Z = pcoords[:, 2].clamp(min=1e-3)
         
+        # print(max(X))
+        # print(max(Y))
+        # tensor([ 185.0799,  204.4476,  220.4772,  ..., 6750.4443, 6782.9245,
+        # 6627.3625], device='cuda:1', dtype=torch.float64)
+        # tensor([  64.3040,   57.3113,   56.2474,  ..., 2028.5731, 2036.7273,
+        #         1988.3274], device='cuda:1', dtype=torch.float64)
+
         # return non-homogeneous coordinate
         if normalize:
-            X_norm = 2*(X / Z)/(416) - 1  # Normalized, -1 if on extreme left, 1 if on extreme right (x = w-1) [B, H*W]
-            Y_norm = 2*(Y / Z)/(128) - 1  # Idem [B, H*W]
+            bf_norm = torch.stack([X/Z, Y/Z], dim=2)
+            print(shape[-2], shape[-1])
+            # tensor([370]) tensor([1226])
+            X_norm = 2*(X / Z)/(shape[-1]) - 1  # Normalized, -1 if on extreme left, 1 if on extreme right (x = w-1) [B, H*W]
+            Y_norm = 2*(Y / Z)/(shape[-2]) - 1  # Idem [B, H*W]
+            # X_norm = 2*(X / Z)/(shape[-1].to(X.device)) - 1  # Normalized, -1 if on extreme left, 1 if on extreme right (x = w-1) [B, H*W]
+            # Y_norm = 2*(Y / Z)/(shape[-2].to(X.device)) - 1  # Idem [B, H*W]
         
             pixel_coords = torch.stack([X_norm, Y_norm], dim=2)  # [B, H*W, 2]
             # print(pixel_coords.shape)
-            return pixel_coords.float()
+            return pixel_coords.float(), bf_norm
         else:
             return torch.stack([X/Z, Y/Z], dim=2)#pixel_coords#.reshape(b, h, w, 2)
 
@@ -602,34 +638,34 @@ class HomographicSampler:
     def sj_transform_points(
         self, intrinsics: torch.Tensor, pose_gt: torch.Tensor, depth_map, points, normalize:bool, imshape = None
     ) -> torch.Tensor:
-        # points: [1, 3, H, W]
-        # print("in sj_transform_points",intrinsics.shape, depth_map.shape, points.shape)
-        # in sj_transform_points torch.Size([3, 3]) torch.Size([128, 416]) torch.Size([1, 3, 53248])
 
-        # print(imshape)
-        # (tensor([3]), tensor([376]), tensor([1241]))
+        # input points shape : [1, 3, H*W]
+        # output shape: [1, H*W, 2]
 
         cam_coords = HomographicSampler.pixel2cam(depth_map.unsqueeze(0), intrinsics.inverse(), points, imshape)  # [B,3,H,W] or [B,3n,H,W]
-        # print("cam coord", cam_coords)
-        # in sj_transform_points torch.Size([3, 3]) torch.Size([128, 416]) torch.Size([1, 3, 53248])
-        # cam coord tensor([[[-0.8427, -0.8386, -0.8345,  ...,  0.8662,  0.8703,  0.8744],
-        #         [-0.2375, -0.2375, -0.2375,  ...,  0.2781,  0.2781,  0.2781],
-        #         [ 1.0000,  1.0000,  1.0000,  ...,  1.0000,  1.0000,  1.0000]]],
-        #     device='cuda:1', dtype=torch.float64)
+        # print(max(cam_coords[0,0,:]))
+        # print(max(cam_coords[0,1,:]))
+        # print(max(cam_coords[0,2,:]))
+        
+        # prev, crop version
+        # tensor(-0., device='cuda:1')
+        # tensor(0.0094, device='cuda:1')
+        # tensor(1., device='cuda:1')
+
+        # now
+        # tensor(2851.2961, device='cuda:1', dtype=torch.float64)
+        # tensor(1.5257, device='cuda:1', dtype=torch.float64)
+        # tensor(10000., device='cuda:1', dtype=torch.float64)
 
         # Get projection matrix for tgt camera frame to source pixel frame
         # pose_mat = pose_gt[:3,:4].unsqueeze(0).type(torch.cuda.FloatTensor)  # [B,3,4]
         pose_mat = pose_gt[:3,:4].unsqueeze(0).double()
-        # if direction == "backward":
-        # src_pixel_coords = HomographicSampler.cam2pixel_backward(cam_coords.double(), pose_mat, intrinsics.double(), normalize)  # [B,H,W,2]
-        # elif direction == "forward":
-        src_pixel_coords = HomographicSampler.cam2pixel_forward(cam_coords.double(), pose_mat, intrinsics.double(), normalize)  # [B,H,W,2]
         
-        # print(src_pixel_coords.shape)
-        # torch.Size([1, 53248, 2]) when extract crop 
-
-        # valid_points = src_pixel_coords.abs().max(dim=-1)[0] <= 1
-        # print("out sj_transform")
+        src_pixel_coords = HomographicSampler.cam2pixel_forward(cam_coords.double(), pose_mat, intrinsics.double(), normalize)  # [B,H,W,2]
+        # print(max(src_pixel_coords[0,:,0]))
+        # print(max(src_pixel_coords[0,:,1]))
+        # tensor(1211.9059, device='cuda:1', dtype=torch.float64)
+        # tensor(349.9674, device='cuda:1', dtype=torch.float64)
         
         return src_pixel_coords
         
@@ -641,11 +677,8 @@ class HomographicSampler:
         pose_gt, 
         intrinsics,
         points: Union[torch.Tensor, List[torch.Tensor]],
-        image_shape: Optional[Tuple[int, int]] = None,
         direction: str = "forward",
         ordering: str = "xy",
-        shape = None,
-        crop_point = None,
         imshape = None,
     ) -> Union[torch.Tensor, List[torch.Tensor]]:
         """Apply homography to a set of points.
@@ -687,7 +720,12 @@ class HomographicSampler:
 
         # print("in transform points")
         # print(points.shape, depth_map.shape)
+        # print(imshape)    
+        # torch.Size([1, 21316, 2]) torch.Size([370, 1226])
+        # torch.Size([2, 3, 370, 1226])
 
+        # torch.Size([1, 21316, 2]) torch.Size([1200, 1920])
+        # (tensor([3]), tensor([1200]), tensor([1920]))
         # pad input if using variable length
         lengths = None
         if not isinstance(points, torch.Tensor):
@@ -697,19 +735,24 @@ class HomographicSampler:
 
         # hw, ij order aligns
         # print(points.shape)
-        # torch.Size([1, 21316, 2])
+        # # torch.Size([1, 21316, 2])
         # print(points[0,:3,0])
         # print(points[0,:3,1])
         # print(crop_point)
+        # (tensor([660]), tensor([1582]))
+        # definitely row col order
+        
         
         # points: x,y order
         # crop point: row,column order
-        points[0,:,0] += crop_point[1].to(points.device)
-        points[0,:,1] += crop_point[0].to(points.device)
+        # points[0,:,0] += crop_point[1]
+        # points[0,:,1] += crop_point[0]
+
         # now points are in hw(row column yet)
         # print(points[0,:3,0])
         # print(points[0,:3,1])
-        
+
+
         # nope, already they are xy coord
         # # convert to "xy" ordering
         # if ordering == "yx":
@@ -752,40 +795,16 @@ class HomographicSampler:
             points = points.permute(0,2,1)
             # print(points.shape)
 
+        # print(points.shape)
+        # torch.Size([1, 3, 425216])
+        # print(max(points[0,0,:]), max(points[0,1,:]), max(points[0,2,:]))
+        # tensor(1216.5000, device='cuda:1') tensor(360.5000, device='cuda:1') tensor(1., device='cuda:1')
+        
+        #input points: xy order
         transformed_points = self.sj_transform_points(intrinsics, pose_gt, depth_map, points, normalize=False, imshape=imshape)
         # print(transformed_points.shape)
-        # torch.Size([1, 43780, 2])
-        # print(max(transformed_points[0,:,0]), max(transformed_points[0,:,1]))
-        # tensor(202.3003, device='cuda:1', dtype=torch.float64) tensor(71.1815, device='cuda:1', dtype=torch.float64)
-        
-        # print(transformed_points.shape)
-        # torch.Size([1, 21316, 2])
-        # print(min(transformed_points[0,:,0]), max(transformed_points[0,:,0]))
-        # print(min(transformed_points[0,:,1]), max(transformed_points[0,:,1]))
-        
-        
-        # points: x,y order
-        # crop point: row,column order
-        transformed_points[0,:,0] -= crop_point[1].to(points.device)
-        transformed_points[0,:,1] -= crop_point[0].to(points.device)
-        # print(min(transformed_points[0,:,0]), max(transformed_points[0,:,0]))
-        # print(min(transformed_points[0,:,1]), max(transformed_points[0,:,1]))
-        # tensor(-21.1269, device='cuda:1', dtype=torch.float64) tensor(205.0795, device='cuda:1', dtype=torch.float64)
-        # tensor(41.2677, device='cuda:1', dtype=torch.float64) tensor(225.3743, device='cuda:1', dtype=torch.float64)
-        # tensor(-130.1269, device='cuda:1', dtype=torch.float64) tensor(96.0795, device='cuda:1', dtype=torch.float64)
-        # tensor(-17.7323, device='cuda:1', dtype=torch.float64) tensor(166.3743, device='cuda:1', dtype=torch.float64)
-
-
-        transformed_points = transformed_points.reshape(sh).to("cuda:1")
-        
-        # print("in transform_points ", transformed_points.shape)
-        # in transform_points  torch.Size([1, 21316, 2])
-
-        # # convert back to initial ordering
-        # if ordering == "yx":
-        #     transformed_points = transformed_points[..., [1, 0]]
-
-        # remove padded results if input was variable length
+        # torch.Size([1, 425216, 2])
+       
         if lengths is not None:
             transformed_points = [
                 transformed_points[i, :s] for i, s in enumerate(lengths)

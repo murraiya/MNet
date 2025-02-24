@@ -23,19 +23,19 @@ def total_loss_reduction(
     block_size=None,
 ):
     
-    loss_0, loss_1, precision, recall = jax_loss.total_loss(
-    # loss_0 = jax_loss.total_loss(
-        desc_0,
-        desc_1,
-        corr_0,
-        corr_1,
-        logits_0,
-        logits_1,
+    # loss_0, loss_1, precision, recall = jax_loss.total_loss(
+    loss_0 = jax_loss.total_loss(
+        desc_0.to("cuda:0"),
+        desc_1.to("cuda:0"),
+        corr_0.to("cuda:0"),
+        corr_1.to("cuda:0"),
+        logits_0.to("cuda:0"),
+        logits_1.to("cuda:0"),
         ghost_sim,
         block_size,
     )
 
-    return loss_0.mean(), loss_1.mean(), precision, recall
+    return loss_0.mean() #, loss_1.mean(), precision, recall
 
 
 
@@ -48,6 +48,7 @@ class Loss(torch.nn.Module):
     ) -> None:
         super().__init__()
 
+        self.cnt = 0
         self._block_size = block_size
         self.device = device
         self._temperature_sqrt_inv = 1.0 / math.sqrt(temperature)
@@ -62,6 +63,11 @@ class Loss(torch.nn.Module):
         logits_1,
         ghost_sim=None,
     ):
+        self.cnt+=1
+        # if self.cnt>1: exit(0)
+        # if runs til here, one round from computing loss to updating gradients are fine, and maybe 
+        # last loss remained in the memory raising troubles 
+
         desc_0 = desc_0 * self._temperature_sqrt_inv
         desc_1 = desc_1 * self._temperature_sqrt_inv
         return total_loss_reduction(

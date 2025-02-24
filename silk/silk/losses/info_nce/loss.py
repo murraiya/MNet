@@ -108,7 +108,7 @@ def _scan_reduce(x0, x1, reducer, block_size):
         # print(x0.shape)
         # torch.Size([48600, 128])
         n += 1
-    # print(n)
+    print(n)
     # # 9
     
     x0 = x0.reshape(n, block_size, x0.shape[1])
@@ -328,7 +328,7 @@ def sym_corr_cross_entropy(
 ):
     loss_0 = asym_corr_cross_entropy(
         lse_0,
-        corr_0.clone(),
+        corr_0,
         desc_0.clone(),
         desc_1.clone(),
         ghost_sim=ghost_sim,
@@ -433,6 +433,7 @@ def total_loss(
     ghost_sim,
     block_size,
 ):
+
     if block_size is None:  # reduction on full similarity matrix
         x0x1 = desc_0 @ desc_1.T
 
@@ -442,33 +443,16 @@ def total_loss(
         argmax_1 = torch.argmax(x0x1, axis=0)
         max_0 = torch.max(x0x1, axis=1)[0]
         max_1 = torch.max(x0x1, axis=0)[0]
+
     else:  # reduction by scanning blocks of similarity matrix
+        def reducer(x0, x1, device="cuda:0"):
+            # print(x0.shape, x1.shape)
+            # torch.Size([5400, 128]) torch.Size([425216, 128])
 
-        def reducer(x0, x1, device="cuda:1"):
-            # print(x0.device, x1.device)
-            # cuda:1 cuda:1
-            x0x1 = (x0 @ x1.T).to("cuda:0")      
-            # print(x0.device, x1.device, x0x1.device)
-            # cuda:1 cuda:1 cuda:0
+            x0x1 = x0 @ x1.T
+            # print(x0x1.shape)      
+            # torch.Size([5400, 425216])
 
-            # with torch.cuda.device("cuda:0"):
-            #     print(torch.cuda.memory_allocated())
-            # with torch.cuda.device("cuda:1"):
-            #     print(torch.cuda.memory_allocated())       
-            
-            # 4729077760
-            # 5611986944
-     
-            # a = torch.logsumexp(x0x1.to("cuda:1"), axis=1) 
-            # b = torch.argmax(x0x1.to("cuda:1"), axis=1) 
-            # c = torch.max(x0x1.to("cuda:1"), axis=1)[0]  #take only values, not indices
-            # with torch.cuda.device("cuda:0"):
-            #     print(torch.cuda.memory_allocated())
-            # with torch.cuda.device("cuda:1"):
-            #     print(torch.cuda.memory_allocated())
-            # # 14187353600
-            # # 5611986944
-                            
             output = torch.stack([
                 torch.logsumexp(x0x1, axis=1), 
                 torch.argmax(x0x1, axis=1), 
@@ -490,7 +474,7 @@ def total_loss(
             # 18916496896
             # 5612051968
 
-            return output.to(device) #.to(device_)
+            return output.to(device)
 
         lse_0, argmax_0, max_0 = _scan_reduce(
             desc_0,
@@ -515,25 +499,29 @@ def total_loss(
     loss_0 = sym_corr_cross_entropy(
         lse_0,
         lse_1,
-        desc_0.clone(),
-        desc_1.clone(),
-        corr_0.clone(),
-        corr_1.clone(),
+        desc_0.to("cuda:0"),
+        desc_1.to("cuda:0"),
+        corr_0,
+        corr_1,
         ghost_sim,
     )
 
     # matching loss
     # L_key
-    loss_1, precision, recall = corr_matching_binary_cross_entropy(
-        argmax_0.unsqueeze(0),
-        argmax_1.unsqueeze(0),
-        max_0.unsqueeze(0),
-        max_1.unsqueeze(0),
-        corr_0,
-        corr_1,
-        logits_0,
-        logits_1,
-        ghost_sim,
-    )
-    return loss_0.to("cuda:1"), loss_1.to("cuda:1"), precision.to("cuda:1"), recall.to("cuda:1")
+    # loss_1, precision, recall = corr_matching_binary_cross_entropy(
+    #     argmax_0.unsqueeze(0),
+    #     argmax_1.unsqueeze(0),
+    #     max_0.unsqueeze(0),
+    #     max_1.unsqueeze(0),
+    #     corr_0,
+    #     corr_1,
+    #     logits_0,
+    #     logits_1,
+    #     ghost_sim,
+    # )
+
+    return loss_0.to("cuda:1")
+
+
+    # return loss_0.to("cuda:1"), loss_1.to("cuda:1"), precision.to("cuda:1"), recall.to("cuda:1")
     # return loss_0.to("cuda:1"), loss_1, precision, recall

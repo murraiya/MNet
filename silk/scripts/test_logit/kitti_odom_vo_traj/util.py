@@ -27,10 +27,10 @@ from silk.config.model import load_model_from_checkpoint
 from silk.models.silk import matcher
 
     
-# CHECKPOINT_PATH = os.path.join(os.path.dirname(__file__), "../../assets/models/silk/analysis/alpha/pvgg-4.ckpt")
-CHECKPOINT_PATH = os.path.join(
-    os.path.dirname(__file__), "../../../lightning_logs/1113_raw_mot/checkpoints/epoch=94-step=79419.ckpt"
-)
+# CHECKPOINT_PATH = os.path.join(os.path.dirname(__file__), "../../../assets/models/silk/analysis/alpha/pvgg-4.ckpt")
+# CHECKPOINT_PATH = os.path.join(
+#     os.path.dirname(__file__), "../../../lightning_logs/1113_raw_mot/checkpoints/epoch=94-step=79419.ckpt"
+# )
 
 DEVICE = "cuda:1"
 

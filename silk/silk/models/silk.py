@@ -207,7 +207,6 @@ class SiLKBase(
 
 
 
-
     def _init_loss_flow(
         self,
         images_input_name, 
@@ -217,27 +216,22 @@ class SiLKBase(
         pose_gt_forward,
         pose_gt_backward,
         intrinsics,
-        crop_point,
-        original_shape,
-        *corr_args,
-        **corr_kwargs,
+        image_shape,
     ):
         self.flow.define_transition(
             "augmented_images",
             self._aug_images,
             images_input_name,
-            "use_image_aug",
         )
         self.flow.define_transition(
-            f"gray_images",
+            "gray_images",
             self._grayify,
-            f"augmented_images",
+            "augmented_images",
         )
         self.flow.define_transition(
-            ("descriptors", "logits", "sparse_positions", "sparse_descriptors", "nms"),
+            ("descriptors", "logits", "sparse_positions", "nms"),
             self._model.forward_flow,
-            # images="gray_images",
-            outputs=Flow.Constant(("normalized_descriptors", "logits", "sparse_positions", "sparse_descriptors", "nms")),
+            outputs=Flow.Constant(("normalized_descriptors", "logits", "sparse_positions", "nms")),
             images = "gray_images",
         )
         self.flow.define_transition(
@@ -279,9 +273,6 @@ class SiLKBase(
         #     "sparse_positions_2",
         #     "sparse_descriptors",
         # )
-        
-        
-        
         # self.flow.define_transition(
         #     "pose_loss",
         #     epiploar_loss,
@@ -291,8 +282,6 @@ class SiLKBase(
         #     "sparse_positions_2",
         #     "sparse_descriptors",
         # )
-        
-        
         
         self.flow.define_transition(
             ("corr_forward", "corr_backward"),
@@ -305,25 +294,24 @@ class SiLKBase(
             intrinsics,
             depth_map_1,
             depth_map_2,
-            crop_point,
-            original_shape,
+            image_shape,
             images_input_name,
         )
         # self.flow.define_transition(
         #     "recon_loss",
         #     photometric_reconstruction_loss,
-        #     intrinsics,
-        #     pose_gt_forward, 
-        #     pose_gt_backward,
-        #     "sparse_positions_1",
-        #     "sparse_positions_2",
         #     "gray_images",
         #     depth_map_1,
         #     depth_map_2,
+        #     intrinsics,
+        #     pose_gt_forward, 
+        #     pose_gt_backward,
+        #     "nms", 
+        #     "descriptors",
         # )
         self.flow.define_transition(
-            ("acontextual_descriptor_loss", "keypoint_loss", "precision", "recall"),
-            # "acontextual_descriptor_loss", 
+            # ("acontextual_descriptor_loss", "keypoint_loss", "precision", "recall"),
+            "acontextual_descriptor_loss", 
             self._loss,
             "descriptors_0",
             "descriptors_1",
@@ -352,13 +340,10 @@ class SiLKBase(
         # )
         self._loss_fn = self.flow.with_outputs(
             (
-                # "pose_loss",
-                # "recon_loss",
-                # "contextual_descriptor_loss",
-                "acontextual_descriptor_loss",
-                "keypoint_loss",
-                "precision",
-                "recall",
+                "acontextual_descriptor_loss" 
+                # "keypoint_loss",                
+                # "precision",
+                # "recall",
             )
         )
 
@@ -439,9 +424,8 @@ class SiLKBase(
 
         return desc_loss
 
-    def _aug_images(self, images, use_image_aug):
-        if use_image_aug:
-            images = self._image_aug_transform(images)
+    def _aug_images(self, images):
+        images = self._image_aug_transform(images)
         return images
 
     def _split_descriptors(self, descriptors):
@@ -479,34 +463,28 @@ class SiLKBase(
         # self._loss_fn(
         #     batch, use_image_aug
         # )
-        actx_desc_loss, keypt_loss, precision, recall = \
+        actx_desc_loss = \
         self._loss_fn(
             batch, use_image_aug
         )
+        
         # if math.isnan(actx_desc_loss):
         #     print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         # if math.isnan(keypt_loss):
         #     print("keypt loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         
-        # f1 = (2 * precision * recall) / (precision + recall)
-
-        # loss = ctx_desc_loss + actx_desc_loss + 10*recon_loss + 10*pose_loss #+ 10*recon_loss
-        
-        
-        loss = actx_desc_loss + keypt_loss
-        # RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn
+        loss = actx_desc_loss
 
 
         self.log(f"{mode}.total.loss", loss)
-        # self.log(f"{mode}.pose.loss", 10*pose_loss)
-        # self.log(f"{mode}.contextual.descriptors.loss", ctx_desc_loss)
         self.log(f"{mode}.acontextual.descriptors.loss", actx_desc_loss)
-        self.log(f"{mode}.keypoints.loss", keypt_loss)
-        self.log(f"{mode}.precision", precision)
-        self.log(f"{mode}.recall", recall)
-        # self.log(f"{mode}.f1", f1)
+        # self.log(f"{mode}.keypoints.loss", keypt_loss)
+        # self.log(f"{mode}.recon.loss", recon_loss)
+        # self.log(f"{mode}.precision", precision)
+        # self.log(f"{mode}.recall", recall)
         if (self._ghost_sim is not None) and (mode == "train"):
             self.log("ghost.sim", self._ghost_sim)
+        if mode=="train": exit(0)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -550,7 +528,7 @@ class SiLKRandomHomographies(SiLKBase):
             else training_random_homography_kwargs
         )
         self.flow.define_transition(
-            ("images_1", "images_2", "image_shape", "pose_gt_forward", "pose_gt_backward", "intrinsics", "depth_map_1", "depth_map_2", "crop_point", "original_shape"),
+            ("images_1", "images_2", "image_shape", "pose_gt_forward", "pose_gt_backward", "intrinsics", "depth_map_1", "depth_map_2"),
             self._check_batch, 
             "batch"
         )
@@ -568,9 +546,6 @@ class SiLKRandomHomographies(SiLKBase):
             "pose_gt_forward",
             "pose_gt_backward",
             "intrinsics",
-            "crop_point",
-            "original_shape",
-            "descriptors",
             "image_shape",
         )
 
@@ -586,18 +561,12 @@ class SiLKRandomHomographies(SiLKBase):
         batch.ensure_exists("intrinsics")
         batch.ensure_exists("depth_map_1")
         batch.ensure_exists("depth_map_2")
-        # print(batch["image_1"].shape) #torch.Size([1, 3, 128, 416])
-        # check data shape
-        # print(type(batch["image_1"][0])) #torch tensor, real image
-        # print(type(batch["image_1"][1])) #crop point
         
-        assert len(batch["image_1"][0].shape) == 4
-        assert len(batch["image_2"][0].shape) == 4
-        assert batch["image_1"][1] == batch["image_2"][1] 
-        assert batch["image_1"][2] == batch["image_2"][2] 
+        assert len(batch["image_1"].shape) == 4
+        assert len(batch["image_2"].shape) == 4
         
-        image_1 = batch["image_1"][0].to(self.device)
-        image_2 = batch["image_2"][0].to(self.device)
+        image_1 = batch["image_1"].to(self.device)
+        image_2 = batch["image_2"].to(self.device)
         shape = image_1.shape
         pose_forward = torch.from_numpy(batch["rel_pose"][0][0][0]).to(self.device)
         pose_backward = torch.from_numpy(batch["rel_pose"][0][0][1]).to(self.device)
@@ -606,9 +575,8 @@ class SiLKRandomHomographies(SiLKBase):
         intrinsics = torch.from_numpy(batch["intrinsics"][0][0]).to(self.device)
         depth_map_1 = torch.from_numpy(batch["depth_map_1"][0]).to(self.device)
         depth_map_2 = torch.from_numpy(batch["depth_map_2"][0]).to(self.device)
-        # print(depth_map_1 == depth_map_2)
 
-        return image_1, image_2, shape, pose_forward, pose_backward, intrinsics, depth_map_1, depth_map_2, batch["image_1"][1], batch["image_1"][2]
+        return image_1, image_2, shape, pose_forward, pose_backward, intrinsics, depth_map_1, depth_map_2
 
     def _warp_images(self, images_1, images_2):
         shape = images_1.shape
@@ -627,7 +595,7 @@ class SiLKRandomHomographies(SiLKBase):
 
 
     # the 241015 version
-    def _get_corr(self, nms, descriptors, image_shape, pose_gt_forward, pose_gt_backward, intrinsics, depth_map_1, depth_map_2, crop_point, sh, img):
+    def _get_corr(self, nms, descriptors, image_shape, pose_gt_forward, pose_gt_backward, intrinsics, depth_map_1, depth_map_2, sh, img):
         sampler = HomographicSampler(
             image_shape[0],     # batch_size 1 
             # shape[-2:],   # 3, 164, 164 ??
@@ -647,19 +615,27 @@ class SiLKRandomHomographies(SiLKBase):
             device=descriptors.device,
             normalized=False,
         )
+        # print(positions.shape)
+        # torch.Size([1, 352, 1208, 2])
+
         positions = positions.expand(batch_size, -1, -1, -1)  # add batch dim
         positions = positions.reshape(batch_size, -1, 2)
-
+        # print(positions[0][:10]) 0.5, 0.5 ~
         
         coord_mapping = self._model.coordinate_mapping_composer.get(
             "images",
             "raw_descriptors",
         )
-
+        # print(coord_mapping)
+        # x <- tensor([1., 1.]) x + tensor([-9., -9.])
+        
         # send to image coordinates
         positions = coord_mapping.reverse(positions)
-        # torch.Size([1, 21316, 2])
-        
+        # print(positions[0][:10]) 9.5,9.5~
+        # print(max(positions[0, :, 0]), max(positions[0, :, 1]))
+        # tensor(1216.5000, device='cuda:1') tensor(360.5000, device='cuda:1')
+
+
         # this is right version of making corr 241113
         # transform label positions to transformed image space
         warped_positions_backward = sampler.transform_points(
@@ -667,23 +643,25 @@ class SiLKRandomHomographies(SiLKBase):
             pose_gt_forward, 
             intrinsics.clone(),
             positions.clone(),
-            image_shape=image_shape[-2:],
+            # image_shape=image_shape[-2:],
             ordering="xy",
-            shape=(descriptors_height,descriptors_width),    
-            crop_point = crop_point,    
+            # shape=(descriptors_height,descriptors_width),    
             imshape = sh,
         )
-        # warped mask is in image2 coordinate, value 0 where no point should be extracted
+        # warped mask is in image2 coordinate, value 0 where no point should be extracte
+        # print(warped_positions_backward.shape) torch.Size([1, 425216, 2])
+        # print(max(warped_positions_backward[0,:,0]), max(warped_positions_backward[0,:,1]))
+        # tensor(601.2357, device='cuda:1', dtype=torch.float64) tensor(178.6385, device='cuda:1', dtype=torch.float64)
 
+        
         warped_positions_forward = sampler.transform_points(
             depth_map_1,
             pose_gt_backward, 
             intrinsics,
             positions.clone(),
-            image_shape=image_shape[-2:],
+            # image_shape=image_shape[-2:],
             ordering="xy",
-            shape=(descriptors_height,descriptors_width),
-            crop_point = crop_point,
+            # shape=(descriptors_height,descriptors_width),
             imshape = sh,
         )
         # img_pair_visual(
@@ -698,6 +676,7 @@ class SiLKRandomHomographies(SiLKBase):
         #     matched_keypoints=warped_positions_backward,
         #     matched_warped_keypoints=positions,
         # )
+
 
         # send back to descriptor coordinates
         warped_positions_forward = coord_mapping.apply(warped_positions_forward)
@@ -748,12 +727,11 @@ def img_pair_visual( # need cv.imread, uint8 img
     image1 = image1.permute(1,2,0).squeeze().cpu().numpy().astype(np.uint8).copy()
     image2 = image2.permute(1,2,0).squeeze().cpu().numpy().astype(np.uint8).copy()
 
-    io.imsave("./folder_for_viz/im1.png", image1)
-    io.imsave("./folder_for_viz/im2.png", image2)
+    io.imsave("folder_for_viz/im1.png", image1)
+    io.imsave("folder_for_viz/im2.png", image2)
 
-
-    matched_keypoints = matched_keypoints.squeeze().cpu().numpy().astype(np.uint8)
-    matched_warped_keypoints = matched_warped_keypoints.squeeze().cpu().numpy().astype(np.uint8)
+    matched_keypoints = matched_keypoints.squeeze().cpu().numpy().astype(np.int32)
+    matched_warped_keypoints = matched_warped_keypoints.squeeze().cpu().numpy().astype(np.int32)
 
     # draw matched keypoint points and lines associating matched keypoints (point correspondences)
     for i in range(len(matched_keypoints)):
