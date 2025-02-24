@@ -482,6 +482,7 @@ def total_loss(
             reducer,
             block_size,
         )
+        
         lse_1, argmax_1, max_1 = _scan_reduce(
             desc_1,
             desc_0,
