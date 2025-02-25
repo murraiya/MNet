@@ -100,22 +100,16 @@ def _scan_reduce(x0, x1, reducer, block_size):
     # 43780
     # 8
 
-    
     if x0.shape[0] % block_size > 0:
+
         r = block_size - x0.shape[0] % block_size
         _0 = torch.tensor(0, dtype=x0.dtype)
-        x0 = torch.nn.functional.pad(x0, (0, 0, r, 0), "constant", _0)
-        # print(x0.shape)
-        # torch.Size([48600, 128])
+        x0 = torch.nn.functional.pad(x0, (0, 0, 0, r), "constant", _0)
         n += 1
-    print(n)
-    # # 9
     
     x0 = x0.reshape(n, block_size, x0.shape[1])
     xs = x0.clone()
     
-    # print(x0.shape, x1.shape, xs.shape)
-    # torch.Size([9, 5400, 128]) torch.Size([43780, 128]) torch.Size([9, 5400, 128])
     def scan(f, init, xs, length=None):
         if xs is None:
             xs = [None] * length
@@ -433,7 +427,7 @@ def total_loss(
     ghost_sim,
     block_size,
 ):
-
+    print(desc_0.shape)
     if block_size is None:  # reduction on full similarity matrix
         x0x1 = desc_0 @ desc_1.T
 
@@ -483,12 +477,16 @@ def total_loss(
             block_size,
         )
         
+        print(lse_0.shape)
+        exit(0)
+
         lse_1, argmax_1, max_1 = _scan_reduce(
             desc_1,
             desc_0,
             reducer,
             block_size,
         )
+
         # print(lse_1.shape, argmax_1.shape, max_1.shape)     
         # torch.Size([43780]) torch.Size([43780]) torch.Size([43780])
         # print(lse_1.dtype, argmax_1.dtype, max_1.dtype)     
