@@ -220,7 +220,10 @@ class MagicPoint(AutoForward, torch.nn.Module):
             "score",
         )
         flow.define_transition(
-            ("positions", "sparse_mask"), #positions: pos + prob, no grad on pos, grad on prob. 
-            prob_map_to_positions_with_prob,
-            "nms",
+            ("positions", "sparse_mask"), #positions: pos + prob, no grad on pos, grad on prob.
+            partial(
+                prob_map_to_positions_with_prob,
+                top_k = detection_top_k,
+            ),
+            prob_map = "nms",
         )

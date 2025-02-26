@@ -24,13 +24,13 @@ def positions_to_unidirectional_correspondence(
 
     # floored_positions = torch.floor(positions / cell_size).astype(torch.int32)
     device = positions.device
-    print(positions.shape)
+    # print(positions.shape)
     # # torch.Size([1, 43780, 2])
     # print(min(positions[0,:,0]), max(positions[0,:,0]))
     # print(min(positions[0,:,1]), max(positions[0,:,1]))
 
     floored_positions = torch.floor(positions).to(torch.int32)
-    a = floored_positions.clone()
+    # a = floored_positions.clone()
     # print(floored_positions.shape)
     # torch.Size([1, 43780, 2])
     # print(min(floored_positions[0,:,0]), max(floored_positions[0,:,0]))
@@ -166,8 +166,8 @@ def asym_corr_cross_entropy(
     # n_ghost = query_corr.shape[0] - n_corr
 
     # # make -1 correspondences out-of-bound (for the next get fille)
-    print(desc_0.shape, desc_1.shape)
-    print(corr.shape)
+    # print(desc_0.shape, desc_1.shape)
+    # print(corr.shape)
     corr_mask = corr.repeat(desc_1.shape[1], 1).transpose(1,0)
 
     _desc_1 = torch.where(corr_mask>0, desc_1[corr], 0)

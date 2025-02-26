@@ -507,7 +507,7 @@ class HomographicSampler:
         # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
         # tensor(-0.9845, device='cuda:1', dtype=torch.float64) tensor(-0.9486, device='cuda:1', dtype=torch.float64) tensor(0.9845, device='cuda:1', dtype=torch.float64) tensor(0.9054, device='cuda:1', dtype=torch.float64)
 
-        print(depth.dtype, points_.dtype)
+        # print(depth.dtype, points_.dtype)
         # torch.float32 torch.float32
         # fuck x,y matters
         if depth.reshape(-1).shape != points.reshape(-1).shape:

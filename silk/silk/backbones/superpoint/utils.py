@@ -123,7 +123,9 @@ def prob_map_to_points_map(
         )
 
     # io.imsave("folder_for_viz/prob_to_map_1.png", prob_map[0].unsqueeze(2).cpu().numpy())
-
+    if prob_thresh != 1.0: 
+        print("wrong thresh")
+        exit(0)
     if top_k:
         # print("top_k")
         if top_k >= prob_map.shape[-1] * prob_map.shape[-2]:
@@ -142,7 +144,7 @@ def prob_map_to_points_map(
                 top_k_percentile,
                 # 0.95,
                 dim=1,
-                interpolation="lower",
+                interpolation="midpoint",
             )
             
         prob_thresh = torch.minimum(top_k_threshold, prob_thresh)
@@ -488,6 +490,7 @@ def float_positions_to_int(
 
 def prob_map_to_positions_with_prob(
     prob_map: torch.Tensor,
+    top_k: int = None,
     threshold: float = 0.0,
 ) -> Tuple[torch.Tensor]:
     """Convert probability map to positions with probability associated with each position.
@@ -508,12 +511,11 @@ def prob_map_to_positions_with_prob(
     # print("2 ", prob_map.requires_grad)
 
     # print(prob_map.requires_grad)
+    # print(prob_map.shape)
     positions = tuple(
         torch.nonzero(prob_map[i] > threshold).float() + 0.5
         for i in range(prob_map.shape[0])
-    )
-    # print("3 ", positions[0].requires_grad) False 
-
+    )    
     prob = tuple(
         prob_map[i][torch.nonzero(prob_map[i] > threshold, as_tuple=True)][:, None]
         for i in range(prob_map.shape[0])
@@ -522,9 +524,16 @@ def prob_map_to_positions_with_prob(
         torch.nonzero(prob_map[i] > threshold, as_tuple=True)
         for i in range(prob_map.shape[0])
     )
-
+    # print(positions[0].shape, positions[1].shape)
+    # torch.Size([10001, 2]) torch.Size([10001, 2])
+    
+    idx = min(positions[0].shape[0], positions[1].shape[0])
     positions_with_prob = tuple(
-        torch.cat((pos, prob), dim=1) for pos, prob in zip(positions, prob)
+        torch.cat((pos, prob), dim=1)[:idx] for pos, prob in zip(positions, prob)
     )
-    # print("4_ ", positions_with_prob[0].requires_grad) True
+    # print(positions_with_prob[0].shape)
+    # torch.Size([10001, 3])
+    # positions_with_prob[0] = positions_with_prob[0][:top_k]
+    # positions_with_prob[1] = positions_with_prob[1][:top_k]
+
     return positions_with_prob, top_K_mask
