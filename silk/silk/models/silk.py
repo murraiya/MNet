@@ -26,6 +26,7 @@ from silk.flow import AutoForward, Flow
 from silk.losses.info_nce.loss import (
     keep_mutual_correspondences_only,
     positions_to_unidirectional_correspondence,
+    sparse_positions_to_corr,
 )
 from silk.losses.sfmlearner.sfm_loss import epiploar_loss, photometric_reconstruction_loss
 from silk.matching.mnn import (
@@ -284,7 +285,7 @@ class SiLKBase(
         # )
         
         self.flow.define_transition(
-            ("corr_forward", "corr_backward", "sparse_corr_forward", "sparse_corr_backward"),
+            ("corr_forward", "corr_backward"),
             corr_fn,
             "nms",
             "descriptors",
@@ -318,8 +319,8 @@ class SiLKBase(
             "sparse_descriptors", 
             "descriptors_0",
             "descriptors_1",
-            "sparse_corr_forward", 
-            "sparse_corr_backward",
+            "corr_forward", 
+            "corr_backward",
             "logits_0",
             "logits_1",
             Flow.Constant(self._ghost_sim),
@@ -487,7 +488,7 @@ class SiLKBase(
         # self.log(f"{mode}.recall", recall)
         if (self._ghost_sim is not None) and (mode == "train"):
             self.log("ghost.sim", self._ghost_sim)
-        if mode=="train": exit(0)
+
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -612,17 +613,17 @@ class SiLKRandomHomographies(SiLKBase):
         cell_size = 1.0
 
         # remove confidence value
-        positions = HomographicSampler._create_meshgrid(
-            descriptors_height,
-            descriptors_width,
-            device=descriptors.device,
-            normalized=False,
-        )
-        # print(positions.shape)
-        # torch.Size([1, 352, 1208, 2])
+        # positions = HomographicSampler._create_meshgrid(
+        #     descriptors_height,
+        #     descriptors_width,
+        #     device=descriptors.device,
+        #     normalized=False,
+        # )
+        # # print(positions.shape)
+        # # torch.Size([1, 352, 1208, 2])
 
-        positions = positions.expand(batch_size, -1, -1, -1)  # add batch dim
-        positions = positions.reshape(batch_size, -1, 2)
+        # positions = positions.expand(batch_size, -1, -1, -1)  # add batch dim
+        # positions = positions.reshape(batch_size, -1, 2)
         # print(positions[0][:10]) 0.5, 0.5 ~
         
         coord_mapping = self._model.coordinate_mapping_composer.get(
@@ -639,18 +640,54 @@ class SiLKRandomHomographies(SiLKBase):
         # torch.Size([1, 425216, 2]) torch.float32
 
         # send to image coordinates
-        positions = coord_mapping.reverse(positions)
-        sparse_positions_0 = coord_mapping.reverse(sparse_positions[0][ :, :2])
-        sparse_positions_1 = coord_mapping.reverse(sparse_positions[1][ :, :2])
-        # make x,y order
-        sparse_positions_0 = sparse_positions_0[:, [1,0]].unsqueeze(0)
-        sparse_positions_1 = sparse_positions_1[:, [1,0]].unsqueeze(0)
-        # print(sparse_positions_0.shape) torch.Size([1, 7000, 2])
-        # print(sparse_positions_0[0][:10])
+        # positions = coord_mapping.reverse(positions)
 
-        # print(positions[0][:10]) 9.5,9.5~
-        # print(max(positions[0, :, 0]), max(positions[0, :, 1]))
-        # tensor(1216.5000, device='cuda:1') tensor(360.5000, device='cuda:1')
+        
+        # make x,y order
+        sparse_positions_0 = sparse_positions[0][ :, :2][:, [1,0]]
+        sparse_positions_1 = sparse_positions[1][ :, :2][:, [1,0]]
+        
+        if sparse_positions_0.shape[0] != sparse_positions_1.shape[0]:
+            print(sparse_positions_0.shape, sparse_positions_1.shape)
+            # torch.Size([10001, 2]) torch.Size([10000, 2])
+            # torch.Size([10000, 2]) torch.Size([10001, 2])
+            exit(0)
+
+        sparse_corr_0 = positions_to_unidirectional_correspondence(
+            sparse_positions_0.clone().unsqueeze(0),
+            descriptors_width,
+            descriptors_height,
+            cell_size,
+            ordering="xy",
+        )
+
+        sparse_corr_1 = positions_to_unidirectional_correspondence(
+            sparse_positions_1.clone().unsqueeze(0),
+            descriptors_width,
+            descriptors_height,
+            cell_size,
+            ordering="xy",
+        )
+
+
+        sparse_positions_0 = coord_mapping.reverse(sparse_positions_0).unsqueeze(0)
+        sparse_positions_1 = coord_mapping.reverse(sparse_positions_1).unsqueeze(0)
+        
+
+        
+        # print(sparse_positions_0.shape) #torch.Size([1, 7000, 2])
+        # print(sparse_positions_0[0][:10])
+        # torch.Size([1, 7001, 2])
+        # tensor([[ 55.5000,   9.5000],
+        #         [ 56.5000,   9.5000],
+        #         [ 57.5000,   9.5000],
+        #         [144.5000,   9.5000],
+        #         [197.5000,   9.5000],
+        #         [198.5000,   9.5000],
+        #         [208.5000,   9.5000],
+        #         [267.5000,   9.5000],
+        #         [268.5000,   9.5000],
+        #         [331.5000,   9.5000]], device='cuda:1')
 
 
         # this is right version of making corr 241113
@@ -716,7 +753,7 @@ class SiLKRandomHomographies(SiLKBase):
         # tensor(-10.4018, device='cuda:1', dtype=torch.float64) tensor(1212.9620, device='cuda:1', dtype=torch.float64)
         # tensor(-1.7463, device='cuda:1', dtype=torch.float64) tensor(359.1085, device='cuda:1', dtype=torch.float64)
 
-        corr_forward, floored_positions_0 = positions_to_unidirectional_correspondence(
+        corr_forward = positions_to_unidirectional_correspondence(
             warped_positions_forward,
             descriptors_width,
             descriptors_height,
@@ -724,30 +761,36 @@ class SiLKRandomHomographies(SiLKBase):
             ordering="xy",
         )
 
-        corr_backward, floored_positions_1 = positions_to_unidirectional_correspondence(
+        corr_backward = positions_to_unidirectional_correspondence(
             warped_positions_backward,
             descriptors_width,
             descriptors_height,
             cell_size,
             ordering="xy",
         )
+
+        corr_backward = sparse_positions_to_corr(
+            sparse_corr_0, corr_backward
+        )
+        corr_forward = sparse_positions_to_corr(
+            sparse_corr_1, corr_forward
+        )
         # print(torch.count_nonzero(corr_forward>0), torch.count_nonzero(corr_backward>0))
-        # tensor(6959, device='cuda:1') tensor(7001, device='cuda:1')
+        # # tensor(6959, device='cuda:1') tensor(7001, device='cuda:1')
         # print(corr_forward.shape, corr_backward.shape)
         # torch.Size([1, 7001]) torch.Size([1, 7001])
-
         # print(floored_positions_0.shape, floored_positions_1.shape)
         # torch.Size([1, 7001, 2]) torch.Size([1, 7001, 2])
 
 
-        # corr_forward, corr_backward = keep_mutual_correspondences_only(
-        #     corr_forward, corr_backward
-        # )
+        corr_forward, corr_backward = keep_mutual_correspondences_only(
+            corr_forward, corr_backward
+        )
 
         # print(torch.count_nonzero(corr_forward>0), torch.count_nonzero(corr_backward>0))
         # # tensor(360487, device='cuda:1') tensor(360487, device='cuda:1')
-
-        return corr_forward, corr_backward, floored_positions_0, floored_positions_1
+        
+        return corr_forward, corr_backward
 
 
 

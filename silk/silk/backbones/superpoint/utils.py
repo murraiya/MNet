@@ -142,7 +142,7 @@ def prob_map_to_points_map(
                 top_k_percentile,
                 # 0.95,
                 dim=1,
-                interpolation="midpoint",
+                interpolation="lower",
             )
             
         prob_thresh = torch.minimum(top_k_threshold, prob_thresh)

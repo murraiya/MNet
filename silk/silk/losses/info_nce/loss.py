@@ -24,7 +24,7 @@ def positions_to_unidirectional_correspondence(
 
     # floored_positions = torch.floor(positions / cell_size).astype(torch.int32)
     device = positions.device
-    # print(positions.shape)
+    print(positions.shape)
     # # torch.Size([1, 43780, 2])
     # print(min(positions[0,:,0]), max(positions[0,:,0]))
     # print(min(positions[0,:,1]), max(positions[0,:,1]))
@@ -62,7 +62,19 @@ def positions_to_unidirectional_correspondence(
 
     floored_positions = torch.where(mask, floored_positions, -1)
     
-    return floored_positions, a
+    return floored_positions
+
+
+
+def sparse_positions_to_corr(sparse_positions_0, wapred_positions_1):
+
+    # print(sparse_positions_0.shape, wapred_positions_1.shape)
+    # torch.Size([1, 7001]) torch.Size([1, 7001])
+
+    idx = torch.arange(sparse_positions_0.shape[1], device=wapred_positions_1.device)
+    # print(idx)
+    is_bidir = sparse_positions_0[0] == wapred_positions_1[0]
+    return torch.where(is_bidir, idx, -1).unsqueeze(0)
 
 
 def asym_keep_mutual_correspondences_only(corr_0_, corr_1_):
@@ -74,6 +86,7 @@ def asym_keep_mutual_correspondences_only(corr_0_, corr_1_):
     corr_0 = corr_0_.clone()[0]
     corr_1 = corr_1_.clone()[0]
     idx = torch.arange(corr_0.shape[0], device=corr_0.device)
+   
     is_bidir = corr_1[corr_0] == idx
     return torch.where(is_bidir, corr_0, -1).unsqueeze(0)
 

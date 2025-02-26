@@ -3,7 +3,7 @@ in_channels: 1 # grayscale
 detection_threshold: 1.
 
 ## top-k = 10k and 5k experiments
-detection_top_k: 7000
+detection_top_k: 10000
 # detection_top_k: 5000
 
 ## top-k variations for analysis
