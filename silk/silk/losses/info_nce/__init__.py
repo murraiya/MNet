@@ -55,6 +55,8 @@ class Loss(torch.nn.Module):
 
     def __call__(
         self,
+        sparse_positions,
+        sparse_descriptors,
         desc_0,
         desc_1,
         corr_0,
@@ -68,8 +70,14 @@ class Loss(torch.nn.Module):
         # if runs til here, one round from computing loss to updating gradients are fine, and maybe 
         # last loss remained in the memory raising troubles 
 
-        desc_0 = desc_0 * self._temperature_sqrt_inv
-        desc_1 = desc_1 * self._temperature_sqrt_inv
+        # desc_0 = desc_0 * self._temperature_sqrt_inv
+        # desc_1 = desc_1 * self._temperature_sqrt_inv
+        # print(desc_0.shape, desc_0.dtype)
+        # print(sparse_descriptors[0].shape, sparse_descriptors[0].dtype)
+      
+        desc_0 = sparse_descriptors[0] * self._temperature_sqrt_inv
+        desc_1 = sparse_descriptors[1] * self._temperature_sqrt_inv
+
         return total_loss_reduction(
             desc_0,
             desc_1,

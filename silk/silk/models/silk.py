@@ -229,9 +229,9 @@ class SiLKBase(
             "augmented_images",
         )
         self.flow.define_transition(
-            ("descriptors", "logits", "sparse_positions", "nms"),
+            ("descriptors", "logits", "sparse_positions", "sparse_descriptors", "nms"),
             self._model.forward_flow,
-            outputs=Flow.Constant(("normalized_descriptors", "logits", "sparse_positions", "nms")),
+            outputs=Flow.Constant(("normalized_descriptors", "logits", "sparse_positions", "sparse_descriptors", "nms")),
             images = "gray_images",
         )
         self.flow.define_transition(
@@ -284,11 +284,12 @@ class SiLKBase(
         # )
         
         self.flow.define_transition(
-            ("corr_forward", "corr_backward"),
+            ("corr_forward", "corr_backward", "sparse_corr_forward", "sparse_corr_backward"),
             corr_fn,
             "nms",
             "descriptors",
             "image_shape",
+            "sparse_positions",
             pose_gt_forward,
             pose_gt_backward,
             intrinsics,
@@ -313,10 +314,12 @@ class SiLKBase(
             # ("acontextual_descriptor_loss", "keypoint_loss", "precision", "recall"),
             "acontextual_descriptor_loss", 
             self._loss,
+            "sparse_positions", 
+            "sparse_descriptors", 
             "descriptors_0",
             "descriptors_1",
-            "corr_forward",
-            "corr_backward",
+            "sparse_corr_forward", 
+            "sparse_corr_backward",
             "logits_0",
             "logits_1",
             Flow.Constant(self._ghost_sim),
@@ -595,7 +598,7 @@ class SiLKRandomHomographies(SiLKBase):
 
 
     # the 241015 version
-    def _get_corr(self, nms, descriptors, image_shape, pose_gt_forward, pose_gt_backward, intrinsics, depth_map_1, depth_map_2, sh, img):
+    def _get_corr(self, nms, descriptors, image_shape, sparse_positions, pose_gt_forward, pose_gt_backward, intrinsics, depth_map_1, depth_map_2, sh, img):
         sampler = HomographicSampler(
             image_shape[0],     # batch_size 1 
             # shape[-2:],   # 3, 164, 164 ??
@@ -629,8 +632,22 @@ class SiLKRandomHomographies(SiLKBase):
         # print(coord_mapping)
         # x <- tensor([1., 1.]) x + tensor([-9., -9.])
         
+        
+        # print(sparse_positions[0].shape, sparse_positions[0].dtype)
+        # print(positions.shape, positions.dtype)
+        # torch.Size([7001, 3]) torch.float32
+        # torch.Size([1, 425216, 2]) torch.float32
+
         # send to image coordinates
         positions = coord_mapping.reverse(positions)
+        sparse_positions_0 = coord_mapping.reverse(sparse_positions[0][ :, :2])
+        sparse_positions_1 = coord_mapping.reverse(sparse_positions[1][ :, :2])
+        # make x,y order
+        sparse_positions_0 = sparse_positions_0[:, [1,0]].unsqueeze(0)
+        sparse_positions_1 = sparse_positions_1[:, [1,0]].unsqueeze(0)
+        # print(sparse_positions_0.shape) torch.Size([1, 7000, 2])
+        # print(sparse_positions_0[0][:10])
+
         # print(positions[0][:10]) 9.5,9.5~
         # print(max(positions[0, :, 0]), max(positions[0, :, 1]))
         # tensor(1216.5000, device='cuda:1') tensor(360.5000, device='cuda:1')
@@ -642,7 +659,7 @@ class SiLKRandomHomographies(SiLKBase):
             depth_map_2,
             pose_gt_forward, 
             intrinsics.clone(),
-            positions.clone(),
+            sparse_positions_1.clone(),
             # image_shape=image_shape[-2:],
             ordering="xy",
             # shape=(descriptors_height,descriptors_width),    
@@ -658,7 +675,7 @@ class SiLKRandomHomographies(SiLKBase):
             depth_map_1,
             pose_gt_backward, 
             intrinsics,
-            positions.clone(),
+            sparse_positions_0.clone(),
             # image_shape=image_shape[-2:],
             ordering="xy",
             # shape=(descriptors_height,descriptors_width),
@@ -676,11 +693,16 @@ class SiLKRandomHomographies(SiLKBase):
         #     matched_keypoints=warped_positions_backward,
         #     matched_warped_keypoints=positions,
         # )
-
+        
 
         # send back to descriptor coordinates
         warped_positions_forward = coord_mapping.apply(warped_positions_forward)
         warped_positions_backward = coord_mapping.apply(warped_positions_backward)
+        
+        # print(warped_positions_backward.shape, warped_positions_forward.shape)
+        # torch.Size([1, 7001, 2]) torch.Size([1, 7001, 2])
+
+
         # print("-----------------------")
         # print(min(warped_positions_backward[0,:,0]), max(warped_positions_backward[0,:,0]))
         # print(min(warped_positions_backward[0,:,1]), max(warped_positions_backward[0,:,1]))
@@ -688,7 +710,13 @@ class SiLKRandomHomographies(SiLKBase):
         # print(min(warped_positions_forward[0,:,0]), max(warped_positions_forward[0,:,0]))
         # print(min(warped_positions_forward[0,:,1]), max(warped_positions_forward[0,:,1]))
 
-        corr_forward = positions_to_unidirectional_correspondence(
+
+        # tensor(10.5201, device='cuda:1', dtype=torch.float64) tensor(1198.5054, device='cuda:1', dtype=torch.float64)
+        # tensor(0.9843, device='cuda:1', dtype=torch.float64) tensor(335.3899, device='cuda:1', dtype=torch.float64)
+        # tensor(-10.4018, device='cuda:1', dtype=torch.float64) tensor(1212.9620, device='cuda:1', dtype=torch.float64)
+        # tensor(-1.7463, device='cuda:1', dtype=torch.float64) tensor(359.1085, device='cuda:1', dtype=torch.float64)
+
+        corr_forward, floored_positions_0 = positions_to_unidirectional_correspondence(
             warped_positions_forward,
             descriptors_width,
             descriptors_height,
@@ -696,7 +724,7 @@ class SiLKRandomHomographies(SiLKBase):
             ordering="xy",
         )
 
-        corr_backward = positions_to_unidirectional_correspondence(
+        corr_backward, floored_positions_1 = positions_to_unidirectional_correspondence(
             warped_positions_backward,
             descriptors_width,
             descriptors_height,
@@ -704,16 +732,22 @@ class SiLKRandomHomographies(SiLKBase):
             ordering="xy",
         )
         # print(torch.count_nonzero(corr_forward>0), torch.count_nonzero(corr_backward>0))
+        # tensor(6959, device='cuda:1') tensor(7001, device='cuda:1')
+        # print(corr_forward.shape, corr_backward.shape)
+        # torch.Size([1, 7001]) torch.Size([1, 7001])
+
+        # print(floored_positions_0.shape, floored_positions_1.shape)
+        # torch.Size([1, 7001, 2]) torch.Size([1, 7001, 2])
 
 
-        corr_forward, corr_backward = keep_mutual_correspondences_only(
-            corr_forward, corr_backward
-        )
+        # corr_forward, corr_backward = keep_mutual_correspondences_only(
+        #     corr_forward, corr_backward
+        # )
 
-        # print("++++++++++++++++++")
         # print(torch.count_nonzero(corr_forward>0), torch.count_nonzero(corr_backward>0))
-        
-        return corr_forward, corr_backward
+        # # tensor(360487, device='cuda:1') tensor(360487, device='cuda:1')
+
+        return corr_forward, corr_backward, floored_positions_0, floored_positions_1
 
 
 

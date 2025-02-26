@@ -30,6 +30,7 @@ def positions_to_unidirectional_correspondence(
     # print(min(positions[0,:,1]), max(positions[0,:,1]))
 
     floored_positions = torch.floor(positions).to(torch.int32)
+    a = floored_positions.clone()
     # print(floored_positions.shape)
     # torch.Size([1, 43780, 2])
     # print(min(floored_positions[0,:,0]), max(floored_positions[0,:,0]))
@@ -61,7 +62,7 @@ def positions_to_unidirectional_correspondence(
 
     floored_positions = torch.where(mask, floored_positions, -1)
     
-    return floored_positions
+    return floored_positions, a
 
 
 def asym_keep_mutual_correspondences_only(corr_0_, corr_1_):
@@ -85,28 +86,21 @@ def keep_mutual_correspondences_only(corr_0, corr_1):
 
 
 def _scan_reduce(x0, x1, reducer, block_size):
-    # print(x0.shape)
-    # print(x1.shape)
-    # # torch.Size([1, 43780, 128])
-    # # torch.Size([1, 43780, 128])
-
+    
     x0 = x0.squeeze(0)
     x1 = x1.squeeze(0)
     
     x0_shape0 = x0.shape[0]
     n = x0.shape[0] // block_size
-    # print(x0_shape0)
-    # print(n)
-    # 43780
-    # 8
-
+    
     if x0.shape[0] % block_size > 0:
 
         r = block_size - x0.shape[0] % block_size
         _0 = torch.tensor(0, dtype=x0.dtype)
         x0 = torch.nn.functional.pad(x0, (0, 0, 0, r), "constant", _0)
         n += 1
-    
+        # get rid of paded parts when return 
+
     x0 = x0.reshape(n, block_size, x0.shape[1])
     xs = x0.clone()
     
@@ -115,55 +109,22 @@ def _scan_reduce(x0, x1, reducer, block_size):
             xs = [None] * length
         carry = init #None
         ys = []
-        # print(xs.shape)
-        # torch.Size([82, 5400, 128])
+        
         a = 0
         for x in xs:
             a+=1
-            # print(x.shape)
-            # torch.Size([5400, 128])
-            # with torch.cuda.device("cuda:0"):
-                # print(torch.cuda.memory_allocated())
-            # with torch.cuda.device("cuda:1"):
-                # print(torch.cuda.memory_allocated())
-            # 0
-            # 5498494464
-
 
             carry, y = f(carry, x)  # carry is the carryover
-            # with torch.cuda.device("cuda:0"):
-            #     print(torch.cuda.memory_allocated())
-            # with torch.cuda.device("cuda:1"):
-            #     print(torch.cuda.memory_allocated())
-            # 9458221056
-            # 5612051968
-            # print(y.device, y.dtype, y.shape)
-            # cuda:1 torch.float32 torch.Size([3, 5400])
             ys.append(y)            # the `y`s get accumulated into a stacked array
         
-        # print(len(ys))
-        # 9
-        # print(type(ys[0]))
-        # print(len(ys[0]))
-        
-        # print(ys[0].shape)
-        # torch.Size([3, 5400])
-        # print(ys[0][2].shape)
-        # torch.Size([5400])
         return carry, torch.stack(ys, dim=1)
     
     
     def fun(_, x0):
         return None, reducer(x0, x1)
     
-    # print(n)
-    # 82
     _, accu = scan(fun, None, xs, length=n)
     
-    # print(accu.shape)
-    # print(x0.shape, x1.shape, xs.shape)
-    # torch.Size([3, 9, 5400])
-    # torch.Size([9, 5400, 128]) torch.Size([43780, 128]) torch.Size([9, 5400, 128])
     
     return torch.ravel(accu[0])[:x0_shape0], torch.ravel(accu[1])[:x0_shape0], torch.ravel(accu[2])[:x0_shape0]
     
@@ -179,97 +140,26 @@ def asym_corr_cross_entropy(
     include_ghost_points=False,
 ):
     # we cannot include ghost points if we do not have the ghost similarity parameter
-    assert not (include_ghost_points and (ghost_sim is None))
+    # assert not (include_ghost_points and (ghost_sim is None))
 
     # print(lse.shape, corr.shape, desc_0.shape, desc_1.shape)
     # torch.Size([43780]) torch.Size([1, 43780]) torch.Size([1, 43780, 128]) torch.Size([1, 43780, 128])
-    corr = corr.squeeze(0)
-    desc_0 = desc_0.squeeze(0)
-    desc_1 = desc_1.squeeze(0)
-    
+    corr = corr.squeeze(0)    
     
     # get mask of valid correspondences
     query_corr = corr >= 0
-    ghost_corr = ~query_corr
+    # ghost_corr = ~query_corr
     n_corr = query_corr.sum()
-    n_ghost = query_corr.shape[0] - n_corr
+    # n_ghost = query_corr.shape[0] - n_corr
 
     # # make -1 correspondences out-of-bound (for the next get fille)
-    # corr = torch.where(query_corr, corr, desc_1.shape[0])
-
-    # # align all descriptors from 1 to descriptors from 0
-    # # set unmatched descriptors to 0 (those that are out-of-bound)
-    # _desc_1 = desc_1.at[corr].get(
-    #     mode="fill",
-    #     fill_value=0,
-    # )
-    # _desc_1 = torch.where(corr<desc_1.shape[0], desc_1[corr], 0)
-    
-    # _desc_1 = torch.zeros((corr.shape[0],desc_1.shape[1]), device=desc_1.device)
-    # print(_desc_1.shape, _desc_1.dtype)
-    # torch.Size([43780, 128]) torch.float32
-    # print(desc_1.shape)
-    # torch.Size([43780, 128])
-    
-    #original making S_cc'
-    #  _desc_1 = desc_1.at[corr].get(
-    #     mode="fill",
-    #     fill_value=0,
-    # )
-
-    # # aligned dot product
-    # log_num = jax.vmap(jnp.dot, in_axes=(0, 0), out_axes=0)(desc_0, _desc_1)
-
-    # # compute log of denominator
-    # log_den = lse
-
-    # log_p_corr = jnp.sum(log_num, where=query_corr) - jnp.sum(log_den, where=query_corr)
-
-    
-    # print(corr.shape)
-    # torch.Size([43780])
-    # desc_1_ = torch.where(corr>0, desc_1[corr], 0)
-    
+    print(desc_0.shape, desc_1.shape)
+    print(corr.shape)
     corr_mask = corr.repeat(desc_1.shape[1], 1).transpose(1,0)
-    # print(corr_mask.shape)
-    # torch.Size([43780, 128])
-    # print(corr_mask[0])
-    # print(corr_mask[43770])
-    # tensor([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    #     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    #     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    #     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    #     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    #     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    #     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    #     -1, -1], device='cuda:0', dtype=torch.int32)
-    # tensor([42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559,
-    #         42559, 42559, 42559, 42559, 42559, 42559, 42559, 42559],
-    # same nums are repeated through dim=0
-    # but why is this look like sorted?    
-
-    
-    
-    # print(desc_1.shape)
-    # torch.Size([43780, 128])
 
     _desc_1 = torch.where(corr_mask>0, desc_1[corr], 0)
-    
-    # print(_desc_1.shape)
-    # torch.Size([43780, 128])
-    
-    
+
+
     ################ 
     # this is what they meant
     # idx = corr[43760] 
@@ -280,33 +170,25 @@ def asym_corr_cross_entropy(
 
     # compute log of denominator
     log_den = lse.clone()
-    if ghost_sim is not None:
-        log_den = torch.logaddexp(log_den, ghost_sim)
+    # if ghost_sim is not None:
+    #     log_den = torch.logaddexp(log_den, ghost_sim)
 
     log_p_corr = torch.sum(log_num[query_corr==True]) - torch.sum(log_den[query_corr==True])
-    # print("aaaaaaaaaaa")
-    # print(torch.count_nonzero(torch.sum(log_num[query_corr==True])))
-    # print(torch.count_nonzero(torch.sum(log_den[query_corr==True])))
-    # print(torch.count_nonzero(query_corr==True))
-    if include_ghost_points:
-        log_p_ghost = ghost_sim * n_ghost - torch.sum(log_den[ghost_corr==True])
-    else:
-        log_p_ghost = 0.0
+    
+    # if include_ghost_points:
+    #     log_p_ghost = ghost_sim * n_ghost - torch.sum(log_den[ghost_corr==True])
+    # else:
+    #     log_p_ghost = 0.0
 
     normalize = True
     if normalize:
         log_p_corr /= n_corr
-        log_p_ghost /= n_ghost
+        # log_p_ghost /= n_ghost
     else:
         log_p_corr /= query_corr.shape[0]
-        log_p_ghost /= query_corr.shape[0]
+        # log_p_ghost /= query_corr.shape[0]
 
-    log_p = log_p_corr + log_p_ghost
-    # print(log_p)
-#     tensor(1, device='cuda:1')
-# tensor(1, device='cuda:1')
-# tensor(690, device='cuda:1')
-# tensor(-13.2087, device='cuda:1', grad_fn=<AddBackward0>)
+    log_p = log_p_corr #+ log_p_ghost
 
     return -log_p
 
@@ -320,6 +202,9 @@ def sym_corr_cross_entropy(
     corr_1,
     ghost_sim,
 ):
+    # print(corr_0.shape, corr_1.shape)
+    # torch.Size([1, 7001, 2]) torch.Size([1, 7001, 2])
+
     loss_0 = asym_corr_cross_entropy(
         lse_0,
         corr_0,
@@ -427,71 +312,13 @@ def total_loss(
     ghost_sim,
     block_size,
 ):
-    print(desc_0.shape)
-    if block_size is None:  # reduction on full similarity matrix
-        x0x1 = desc_0 @ desc_1.T
+    # print(desc_0.shape, desc_1.shape)
+    # torch.Size([7001, 128]) torch.Size([7001, 128])
 
-        lse_0 = torch.logsumexp(x0x1, axis=1)
-        lse_1 = torch.logsumexp(x0x1, axis=0)
-        argmax_0 = torch.argmax(x0x1, axis=1)
-        argmax_1 = torch.argmax(x0x1, axis=0)
-        max_0 = torch.max(x0x1, axis=1)[0]
-        max_1 = torch.max(x0x1, axis=0)[0]
+    x0x1 = desc_0 @ desc_1.T
 
-    else:  # reduction by scanning blocks of similarity matrix
-        def reducer(x0, x1, device="cuda:0"):
-            # print(x0.shape, x1.shape)
-            # torch.Size([5400, 128]) torch.Size([425216, 128])
-
-            x0x1 = x0 @ x1.T
-            # print(x0x1.shape)      
-            # torch.Size([5400, 425216])
-
-            output = torch.stack([
-                torch.logsumexp(x0x1, axis=1), 
-                torch.argmax(x0x1, axis=1), 
-                torch.max(x0x1, axis=1)[0]]  #take only values, not indices
-            , dim=0)
-            # with torch.cuda.device("cuda:0"):
-            #     print(torch.cuda.memory_allocated())
-            # with torch.cuda.device("cuda:1"):
-            #     print(torch.cuda.memory_allocated())
-            # 23645639680
-            # 5611986944
-
-            del x0x1
-            # torch.cuda.empty_cache()
-            # with torch.cuda.device("cuda:0"):
-            #     print(torch.cuda.memory_allocated())
-            # with torch.cuda.device("cuda:1"):
-            #     print(torch.cuda.memory_allocated())
-            # 18916496896
-            # 5612051968
-
-            return output.to(device)
-
-        lse_0, argmax_0, max_0 = _scan_reduce(
-            desc_0,
-            desc_1,
-            reducer,
-            block_size,
-        )
-        
-        print(lse_0.shape)
-        exit(0)
-
-        lse_1, argmax_1, max_1 = _scan_reduce(
-            desc_1,
-            desc_0,
-            reducer,
-            block_size,
-        )
-
-        # print(lse_1.shape, argmax_1.shape, max_1.shape)     
-        # torch.Size([43780]) torch.Size([43780]) torch.Size([43780])
-        # print(lse_1.dtype, argmax_1.dtype, max_1.dtype)     
-        #float32 float32 float32
-        # but original was float32, int32, float32
+    lse_0 = torch.logsumexp(x0x1, axis=1) #soft version of max
+    lse_1 = torch.logsumexp(x0x1, axis=0)
         
     # info nce loss
     # L_desc
@@ -504,20 +331,6 @@ def total_loss(
         corr_1,
         ghost_sim,
     )
-
-    # matching loss
-    # L_key
-    # loss_1, precision, recall = corr_matching_binary_cross_entropy(
-    #     argmax_0.unsqueeze(0),
-    #     argmax_1.unsqueeze(0),
-    #     max_0.unsqueeze(0),
-    #     max_1.unsqueeze(0),
-    #     corr_0,
-    #     corr_1,
-    #     logits_0,
-    #     logits_1,
-    #     ghost_sim,
-    # )
 
     return loss_0.to("cuda:1")
 

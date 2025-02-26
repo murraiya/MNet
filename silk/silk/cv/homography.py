@@ -485,81 +485,79 @@ class HomographicSampler:
         # torch.Size([1, 1200, 1920]) (tensor([3]), tensor([1200]), tensor([1920]))
 
         
-        # #########################################
-        # ### grid sample depth 
-        # points_ = points[:,:2,:].permute(0,2,1).double()
-        # # print(points_.shape)
-        # # torch.Size([1, 43780, 2])
-        # # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
-
-        # print(shape)
-        # print(depth.shape)
-        # # torch.Size([1, 3, 370, 1226])
-        # # torch.Size([1, 370, 1226])
-
-        # # normalize bf grid sample
-        # #shape: c, h, w
-        # h = shape[2]
-        # w = shape[]
-        # points_[:,:,0] = points_[:,:,0]/(shape[2]/2) - 1
-        # points_[:,:,1] = points_[:,:,1]/(shape[1]/2) - 1
-        
-        # # print(shape[2], shape[1])
-        # # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
-        # # tensor(-0.7365, device='cuda:1') tensor(3.9441, device='cuda:1') tensor(-0.5028, device='cuda:1') tensor(4.7154, device='cuda:1')
-
-        # print(depth.dtype, points_.dtype)
-        # # torch.float32 torch.float32
-        # # fuck x,y matters
-        # if depth.reshape(-1).shape != points.reshape(-1).shape:
-        #     depth = grid_sample(depth.unsqueeze(0), points_.unsqueeze(0), align_corners=False, mode="nearest")        
-            
-        # depth_ = depth.reshape(1, -1).unsqueeze(0)
-        # print("!!!!!!!!!!!!!!!")
-        # print(depth_.shape)
-        # # torch.Size([1, 1, 21316])
-        # # torch.Size([1, 1, 3495824]) ..?
-
-        # # when get_corr
-        
-        # # print(cam_coords.shape)
-        # # print(depth_.shape, min(depth_[0,0]), max(depth_[0,0]))
-
-
         #########################################
-        ### just getting depth 
-        # points_ = points[:,:2,:].permute(0,2,1).double()
+        ### grid sample depth 
+        points_ = points[:,:2,:].permute(0,2,1).double()
         # print(points_.shape)
         # torch.Size([1, 43780, 2])
         # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
-        # tensor(9.5000, device='cuda:1', dtype=torch.float64) tensor(9.5000, device='cuda:1', dtype=torch.float64) 
-        # tensor(1216.5000, device='cuda:1', dtype=torch.float64) tensor(360.5000, device='cuda:1', dtype=torch.float64)
-
 
         # print(shape)
         # print(depth.shape)
         # torch.Size([1, 3, 370, 1226])
         # torch.Size([1, 370, 1226])
 
-        # depth_points_x_start = torch.floor(min(points[0,0,:])).to(torch.int)
-        # depth_points_x_end = torch.floor(max(points[0,0,:])).to(torch.int)
-        # depth_points_y_start = torch.floor(min(points[0,1,:])).to(torch.int)
-        # depth_points_y_end = torch.floor(max(points[0,1,:])).to(torch.int)
-        depth_points_x_start = torch.floor(points[0,0,0]).to(torch.int)
-        depth_points_x_end = torch.floor(points[0,0,-1]).to(torch.int) + 1
-        depth_points_y_start = torch.floor(points[0,1,0]).to(torch.int)
-        depth_points_y_end = torch.floor(points[0,1,-1]).to(torch.int) + 1
+        # normalize bf grid sample
+        #shape: c, h, w
+        h = shape[2]
+        w = shape[3]
+        points_[:,:,0] = points_[:,:,0]/(w/2) - 1
+        points_[:,:,1] = points_[:,:,1]/(h/2) - 1
         
-        # print(depth_points_x_start, depth_points_x_end, depth_points_y_start, depth_points_y_end)
-        # tensor(9, device='cuda:1', dtype=torch.int32) tensor(1216, device='cuda:1', dtype=torch.int32) tensor(9, device='cuda:1', dtype=torch.int32) tensor(360, device='cuda:1', dtype=torch.int32)
-        
+        # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
+        # tensor(-0.9845, device='cuda:1', dtype=torch.float64) tensor(-0.9486, device='cuda:1', dtype=torch.float64) tensor(0.9845, device='cuda:1', dtype=torch.float64) tensor(0.9054, device='cuda:1', dtype=torch.float64)
 
-        depth = depth[:, depth_points_y_start:depth_points_y_end, depth_points_x_start:depth_points_x_end]
-        # print(depth.shape)
-        # torch.Size([1, 352, 1208])
+        print(depth.dtype, points_.dtype)
+        # torch.float32 torch.float32
+        # fuck x,y matters
+        if depth.reshape(-1).shape != points.reshape(-1).shape:
+            depth = grid_sample(depth.unsqueeze(0), points_.unsqueeze(0), align_corners=False, mode="nearest")        
+            
         depth_ = depth.reshape(1, -1).unsqueeze(0)
         # print(depth_.shape)
-        # torch.Size([1, 1, 425216])
+        # torch.Size([1, 1, 7001])
+
+
+        # when get_corr
+        
+        # print(cam_coords.shape)
+        # print(depth_.shape, min(depth_[0,0]), max(depth_[0,0]))
+
+
+        # #########################################
+        # ### just getting depth 
+        # # points_ = points[:,:2,:].permute(0,2,1).double()
+        # # print(points_.shape)
+        # # torch.Size([1, 43780, 2])
+        # # print(min(points_[0,:,0]), min(points_[0,:,1]),max(points_[0,:,0]), max(points_[0,:,1]))
+        # # tensor(9.5000, device='cuda:1', dtype=torch.float64) tensor(9.5000, device='cuda:1', dtype=torch.float64) 
+        # # tensor(1216.5000, device='cuda:1', dtype=torch.float64) tensor(360.5000, device='cuda:1', dtype=torch.float64)
+
+
+        # # print(shape)
+        # # print(depth.shape)
+        # # torch.Size([1, 3, 370, 1226])
+        # # torch.Size([1, 370, 1226])
+
+        # # depth_points_x_start = torch.floor(min(points[0,0,:])).to(torch.int)
+        # # depth_points_x_end = torch.floor(max(points[0,0,:])).to(torch.int)
+        # # depth_points_y_start = torch.floor(min(points[0,1,:])).to(torch.int)
+        # # depth_points_y_end = torch.floor(max(points[0,1,:])).to(torch.int)
+        # depth_points_x_start = torch.floor(points[0,0,0]).to(torch.int)
+        # depth_points_x_end = torch.floor(points[0,0,-1]).to(torch.int) + 1
+        # depth_points_y_start = torch.floor(points[0,1,0]).to(torch.int)
+        # depth_points_y_end = torch.floor(points[0,1,-1]).to(torch.int) + 1
+        
+        # # print(depth_points_x_start, depth_points_x_end, depth_points_y_start, depth_points_y_end)
+        # # tensor(9, device='cuda:1', dtype=torch.int32) tensor(1216, device='cuda:1', dtype=torch.int32) tensor(9, device='cuda:1', dtype=torch.int32) tensor(360, device='cuda:1', dtype=torch.int32)
+        
+
+        # depth = depth[:, depth_points_y_start:depth_points_y_end, depth_points_x_start:depth_points_x_end]
+        # # print(depth.shape)
+        # # torch.Size([1, 352, 1208])
+        # depth_ = depth.reshape(1, -1).unsqueeze(0)
+        # # print(depth_.shape)
+        # # torch.Size([1, 1, 425216])
 
 
 

@@ -167,7 +167,7 @@ def prob_map_to_points_map(
 
     # io.imsave("folder_for_viz/prob_to_map_3.png", prob_map[0].unsqueeze(2).cpu().numpy())
     # changes here
-    # exit(0)
+  
 
     return prob_map # batch_output
 
