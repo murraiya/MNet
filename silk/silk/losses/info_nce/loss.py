@@ -332,7 +332,76 @@ def total_loss(
 
     lse_0 = torch.logsumexp(x0x1, axis=1) #soft version of max
     lse_1 = torch.logsumexp(x0x1, axis=0)
+    argmax_0 = torch.argmax(x0x1, axis=1)
+    argmax_1 = torch.argmax(x0x1, axis=0)
+    max_0 = torch.max(x0x1, axis=1)[0]
+    max_1 = torch.max(x0x1, axis=0)[0]
+
+
+
+    # ############################################
+    # if block_size is None:  # reduction on full similarity matrix
+    #     x0x1 = desc_0 @ desc_1.T
+
+    #     lse_0 = torch.logsumexp(x0x1, axis=1)
+    #     lse_1 = torch.logsumexp(x0x1, axis=0)
+    #     argmax_0 = torch.argmax(x0x1, axis=1)
+    #     argmax_1 = torch.argmax(x0x1, axis=0)
+    #     max_0 = torch.max(x0x1, axis=1)[0]
+    #     max_1 = torch.max(x0x1, axis=0)[0]
+
+    # else:  # reduction by scanning blocks of similarity matrix
+    #     def reducer(x0, x1, device="cuda:0"):
+    #         # print(x0.shape, x1.shape)
+    #         # torch.Size([5400, 128]) torch.Size([425216, 128])
+
+    #         x0x1 = x0 @ x1.T
+    #         # print(x0x1.shape)      
+    #         # torch.Size([5400, 425216])
+
+    #         output = torch.stack([
+    #             torch.logsumexp(x0x1, axis=1), 
+    #             torch.argmax(x0x1, axis=1), 
+    #             torch.max(x0x1, axis=1)[0]]  #take only values, not indices
+    #         , dim=0)
+    #         # with torch.cuda.device("cuda:0"):
+    #         #     print(torch.cuda.memory_allocated())
+    #         # with torch.cuda.device("cuda:1"):
+    #         #     print(torch.cuda.memory_allocated())
+    #         # 23645639680
+    #         # 5611986944
+
+    #         del x0x1
+    #         # torch.cuda.empty_cache()
+    #         # with torch.cuda.device("cuda:0"):
+    #         #     print(torch.cuda.memory_allocated())
+    #         # with torch.cuda.device("cuda:1"):
+    #         #     print(torch.cuda.memory_allocated())
+    #         # 18916496896
+    #         # 5612051968
+
+    #         return output.to(device)
+
+    #     lse_0, argmax_0, max_0 = _scan_reduce(
+    #         desc_0,
+    #         desc_1,
+    #         reducer,
+    #         block_size,
+    #     )
         
+    #     lse_1, argmax_1, max_1 = _scan_reduce(
+    #         desc_1,
+    #         desc_0,
+    #         reducer,
+    #         block_size,
+    #     )
+    #     # print(lse_1.shape, argmax_1.shape, max_1.shape)     
+    #     # torch.Size([43780]) torch.Size([43780]) torch.Size([43780])
+    #     # print(lse_1.dtype, argmax_1.dtype, max_1.dtype)     
+    #     #float32 float32 float32
+    #     # but original was float32, int32, float32        
+    ############################################
+    
     # info nce loss
     # L_desc
     loss_0 = sym_corr_cross_entropy(
@@ -345,7 +414,25 @@ def total_loss(
         ghost_sim,
     )
 
-    return loss_0.to("cuda:1")
+
+    # matching loss
+    # L_key
+    loss_1, precision, recall = corr_matching_binary_cross_entropy(
+        argmax_0.unsqueeze(0),
+        argmax_1.unsqueeze(0),
+        max_0.unsqueeze(0),
+        max_1.unsqueeze(0),
+        corr_0,
+        corr_1,
+        logits_0,
+        logits_1,
+        ghost_sim,
+    )
+
+
+
+
+    return loss_0.to("cuda:1"), loss_1.to("cuda:1")
 
 
     # return loss_0.to("cuda:1"), loss_1.to("cuda:1"), precision.to("cuda:1"), recall.to("cuda:1")

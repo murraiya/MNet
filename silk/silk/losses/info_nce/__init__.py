@@ -24,7 +24,7 @@ def total_loss_reduction(
 ):
     
     # loss_0, loss_1, precision, recall = jax_loss.total_loss(
-    loss_0 = jax_loss.total_loss(
+    loss_0, loss_1 = jax_loss.total_loss(
         desc_0.to("cuda:0"),
         desc_1.to("cuda:0"),
         corr_0.to("cuda:0"),
@@ -35,7 +35,7 @@ def total_loss_reduction(
         block_size,
     )
 
-    return loss_0.mean() #, loss_1.mean(), precision, recall
+    return loss_0.mean(), loss_1.mean() # precision, recall
 
 
 
@@ -77,7 +77,20 @@ class Loss(torch.nn.Module):
       
         desc_0 = sparse_descriptors[0] * self._temperature_sqrt_inv
         desc_1 = sparse_descriptors[1] * self._temperature_sqrt_inv
+        # print(logits_0.shape)
+        # print(sparse_positions[0].shape)
+        # torch.Size([1, 425216])
+        # torch.Size([10000, 3])
+        logits_0 = sparse_positions[0][:,-1].unsqueeze(0)
+        logits_1 = sparse_positions[1][:,-1].unsqueeze(0)
+        # print(logits_0.shape)
+        # print(min(logits_0), max(logits_0))
+        # print(min(logits_1), max(logits_1))
+        # torch.Size([10001])
+        # tensor(0.7519, device='cuda:1') tensor(0.9944, device='cuda:1')
+        # tensor(0.7736, device='cuda:1') tensor(0.9949, device='cuda:1')
 
+        
         return total_loss_reduction(
             desc_0,
             desc_1,

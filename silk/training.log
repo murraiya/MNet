@@ -7293,3 +7293,1849 @@ TypeError: minimum(): argument 'input' (position 1) must be Tensor, not int
 2025-02-26 09:34:09.247 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
 2025-02-26 09:34:09.247 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
 2025-02-26 09:34:12.283 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 09:54:04.883 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 09:54:04.884 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 09:54:08.003 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 09:54:13.267 | ERROR    | silk.cli:main:111 - An error has been caught in function 'main', process 'MainProcess' (151755), thread 'MainThread' (139812889637312):
+Traceback (most recent call last):
+
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+           │         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+           │         └ <code object <module> at 0x7f28b8ccee40, file "/root/silk/silk/cli/__main__.py", line 1>
+           └ <function _run_code at 0x7f28b97baf80>
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+         └ <code object <module> at 0x7f28b8ccee40, file "/root/silk/silk/cli/__main__.py", line 1>
+
+  File "/root/silk/silk/cli/__main__.py", line 24, in <module>
+    main()
+    └ <function main at 0x7f28b83d2440>
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+    └ <function _run_hydra at 0x7f28b8d0dd80>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+    └ <function _run_app at 0x7f28b8d0de10>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+    └ <function run_and_report at 0x7f28b8d0dcf0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+           └ <function _run_app.<locals>.<lambda> at 0x7f28b822e9e0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+            │     └ <function Hydra.run at 0x7f28b8c572e0>
+            └ <hydra._internal.hydra.Hydra object at 0x7f28b8459990>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+          └ <function run_job at 0x7f28b8d0cee0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+    │   │              │             └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │   │              └ <function main at 0x7f28b83d23b0>
+    │   └ <property object at 0x7f28b8cf3c40>
+    └ JobReturn(overrides=['mode=train-silk'], cfg={'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'pytho...
+
+  File "/root/silk/silk/cli/__main__.py", line 21, in main
+    silk.cli.main(cfg)
+    │    │   │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │    │   └ <function main at 0x7f28b83d1750>
+    │    └ <module 'silk.cli' from '/root/silk/silk/cli/__init__.py'>
+    └ <module 'silk' from '/root/silk/silk/__init__.py'>
+
+> File "/root/silk/silk/cli/__init__.py", line 111, in main
+    return _main(cfg, working_dir)
+           │     │    └ '.'
+           │     └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           └ <function _main at 0x7f28b83d16c0>
+
+  File "/root/silk/silk/cli/__init__.py", line 94, in _main
+    output = _main_dispatch(cfg.mode.command, cfg)
+             │              │                 └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             │              └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             └ <function _main_dispatch at 0x7f28b9625bd0>
+
+  File "/root/silk/silk/cli/__init__.py", line 69, in _main_dispatch
+    return module.main(cfg) #HERE GO SILK.CLI.TRAINING
+           │      │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           │      └ <function main at 0x7f28b97e6830>
+           └ <module 'silk.cli.training' from '/root/silk/silk/cli/training.py'>
+
+  File "/root/silk/silk/cli/training.py", line 90, in main
+    trainer.fit(model, train_loader, val_loader) #usually this becomes train
+    │       │   │      │             └ <torch.utils.data.dataloader.DataLoader object at 0x7f28b808db70>
+    │       │   │      └ <torch.utils.data.dataloader.DataLoader object at 0x7f26474ad480>
+    │       │   └ SiLKRandomHomographies(
+    │       │       (_module): MixedModuleDict(
+    │       │         (_mods): ModuleDict(
+    │       │           (model): SiLKVGG(
+    │       │             (backbone): Pa...
+    │       └ <function Trainer.fit at 0x7f267e4579a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 737, in fit
+    self._call_and_handle_interrupt(
+    │    └ <function Trainer._call_and_handle_interrupt at 0x7f267e457880>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 682, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           │           │       └ {}
+           │           └ (SiLKRandomHomographies(
+           │               (_module): MixedModuleDict(
+           │                 (_mods): ModuleDict(
+           │                   (model): SiLKVGG(
+           │                     (backbone): P...
+           └ <bound method Trainer._fit_impl of <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 772, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+    │    │    │                └ None
+    │    │    └ SiLKRandomHomographies(
+    │    │        (_module): MixedModuleDict(
+    │    │          (_mods): ModuleDict(
+    │    │            (model): SiLKVGG(
+    │    │              (backbone): Pa...
+    │    └ <function Trainer._run at 0x7f267e4743a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1195, in _run
+    self._dispatch()
+    │    └ <function Trainer._dispatch at 0x7f267e4745e0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1274, in _dispatch
+    self.training_type_plugin.start_training(self)
+    │    │                                   └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+    │    └ <property object at 0x7f267e45b920>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 202, in start_training
+    self._results = trainer.run_stage()
+    │    │          │       └ <function Trainer.run_stage at 0x7f267e474670>
+    │    │          └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+    │    └ None
+    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7f2647275ed0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1284, in run_stage
+    return self._run_train()
+           │    └ <function Trainer._run_train at 0x7f267e474790>
+           └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1306, in _run_train
+    self._run_sanity_check(self.lightning_module)
+    │    │                 │    └ <property object at 0x7f267e45be70>
+    │    │                 └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+    │    └ <function Trainer._run_sanity_check at 0x7f267e474940>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1370, in _run_sanity_check
+    self._evaluation_loop.run()
+    │    └ <property object at 0x7f267e479350>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f2647275030>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ ()
+    │    └ <function EvaluationLoop.advance at 0x7f267e408d30>
+    └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7f267e471e10>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 109, in advance
+    dl_outputs = self.epoch_loop.run(dataloader, dataloader_idx, dl_max_batches, self.num_dataloaders)
+                 │    │          │   │           │               │               │    └ <property object at 0x7f267e3d79c0>
+                 │    │          │   │           │               │               └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7f267e471e10>
+                 │    │          │   │           │               └ 1
+                 │    │          │   │           └ 0
+                 │    │          │   └ <pytorch_lightning.utilities.fetching.DataFetcher object at 0x7f267e4a34c0>
+                 │    │          └ <function Loop.run at 0x7f267e596b00>
+                 │    └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7f267e4730a0>
+                 └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7f267e471e10>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (<pytorch_lightning.utilities.fetching.DataFetcher object at 0x7f267e4a34c0>, 0, 1, 1)
+    │    └ <function EvaluationEpochLoop.advance at 0x7f267e3f5e10>
+    └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7f267e4730a0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 123, in advance
+    output = self._evaluation_step(batch, batch_idx, dataloader_idx)
+             │    │                │      │          └ 0
+             │    │                │      └ 0
+             │    │                └ NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │    │                            [255, 255, 255,  ...,  32,  30,  29],
+             │    │                      ...
+             │    └ <function EvaluationEpochLoop._evaluation_step at 0x7f267e3f6290>
+             └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7f267e4730a0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 215, in _evaluation_step
+    output = self.trainer.accelerator.validation_step(step_kwargs)
+             │    │                                   └ OrderedDict([('batch', NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │    │                                               [255, 255, 255,  .....
+             │    └ <property object at 0x7f267e54f790>
+             └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7f267e4730a0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 236, in validation_step
+    return self.training_type_plugin.validation_step(*step_kwargs.values())
+           │    │                    │                │           └ <method 'values' of 'collections.OrderedDict' objects>
+           │    │                    │                └ OrderedDict([('batch', NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                    │                            [255, 255, 255,  .....
+           │    │                    └ <function DDPPlugin.validation_step at 0x7f26c15f1b40>
+           │    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7f2647275ed0>
+           └ <pytorch_lightning.accelerators.gpu.GPUAccelerator object at 0x7f2647277ca0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/ddp.py", line 444, in validation_step
+    return self.model(*args, **kwargs)
+           │    │      │       └ {}
+           │    │      └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                  [255, 255, 255,  ...,  32,  30,  29],
+           │    │           ...
+           │    └ <property object at 0x7f26c15e1c10>
+           └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7f2647275ed0>
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                       [255, 255, 255,  ...,  32,  30,  29],
+           │    │                ...
+           │    └ <function Module._call_impl at 0x7f27675cc5e0>
+           └ DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                         [255, 255, 255,  ...,  32,  30,  29],
+           │                  ...
+           └ <bound method DistributedDataParallel.forward of DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/parallel/distributed.py", line 1523, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+         │    │                 │         └ {}
+         │    │                 └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+         │    │                             [255, 255, 255,  ...,  32,  30,  29],
+         │    │                      ...
+         │    └ <function DistributedDataParallel._run_ddp_forward at 0x7f276720c280>
+         └ DistributedDataParallel(
+             (module): LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/parallel/distributed.py", line 1359, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+           │            │         └ {}
+           │            └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                        [255, 255, 255,  ...,  32,  30,  29],
+           │                 ...
+           └ DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                       [255, 255, 255,  ...,  32,  30,  29],
+           │    │                ...
+           │    └ <function Module._call_impl at 0x7f27675cc5e0>
+           └ LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_module): MixedModuleDict(
+                   (_mods): ModuleDict(
+               ...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                         [255, 255, 255,  ...,  32,  30,  29],
+           │                  ...
+           └ <bound method _LightningModuleWrapperBase.forward of LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_mo...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/overrides/base.py", line 92, in forward
+    output = self.module.validation_step(*inputs, **kwargs)
+             │                            │         └ {}
+             │                            └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │                                        [255, 255, 255,  ...,  32,  30,  29],
+             │                                 ...
+             └ LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): MixedModuleDict(
+                     (_mods): ModuleDict(
+                 ...
+
+  File "/root/silk/silk/models/silk.py", line 502, in validation_step
+    return self._total_loss(
+           │    └ <function SiLKBase._total_loss at 0x7f2668ebf010>
+           └ SiLKRandomHomographies(
+               (_module): MixedModuleDict(
+                 (_mods): ModuleDict(
+                   (model): SiLKVGG(
+                     (backbone): Pa...
+
+  File "/root/silk/silk/models/silk.py", line 471, in _total_loss
+    self._loss_fn(
+    │    └ <silk.flow.FixedOutputFlow object at 0x7f266787efb0>
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+
+  File "/root/silk/silk/flow.py", line 307, in __call__
+    return self._flow.flow_from_tape(self._tape, self._output_indexes, inputs)
+           │    │     │              │    │      │    │                └ {'batch': NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │     │              │    │      │    │                            [255, 255, 255,  ...,  32,  30, ...
+           │    │     │              │    │      │    └ 35
+           │    │     │              │    │      └ <silk.flow.FixedOutputFlow object at 0x7f266787efb0>
+           │    │     │              │    └ ((0, ()), (2, [0]), (3, ()), (4, ()), (5, ()), (6, ()), (7, ()), (8, ()), (9, ()), (10, [2]), (11, [4, 3]), (12, ()), (13, [1...
+           │    │     │              └ <silk.flow.FixedOutputFlow object at 0x7f266787efb0>
+           │    │     └ <function Flow.flow_from_tape at 0x7f267366c160>
+           │    └ <silk.flow.Flow object at 0x7f266787f040>
+           └ <silk.flow.FixedOutputFlow object at 0x7f266787efb0>
+
+  File "/root/silk/silk/flow.py", line 221, in flow_from_tape
+    session[index] = self._transitions[index](session, inputs)
+    │       │        │    │            │      │        └ {'batch': NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+    │       │        │    │            │      │                    [255, 255, 255,  ...,  32,  30, ...
+    │       │        │    │            │      └ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, (tensor([[5.0000...
+    │       │        │    │            └ 35
+    │       │        │    └ [<silk.flow._InputExtraction object at 0x7f266787fb80>, <silk.flow._InputExtraction object at 0x7f266787ef20>, <silk.flow._Fu...
+    │       │        └ <silk.flow.Flow object at 0x7f266787f040>
+    │       └ 35
+    └ [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, (tensor([[5.0000...
+
+  File "/root/silk/silk/flow.py", line 97, in __call__
+    return self._function(*arguments.args, **arguments.kwargs)
+           │    │          │         │       │         └ <property object at 0x7f28b94b4450>
+           │    │          │         │       └ <BoundArguments (sparse_positions=(tensor([[5.0000e-01, 2.5950e+02, 7.6446e-01],
+           │    │          │         │                 [5.0000e-01, 2.6050e+02, 7.7384e-01]...
+           │    │          │         └ <property object at 0x7f28b94b4400>
+           │    │          └ <BoundArguments (sparse_positions=(tensor([[5.0000e-01, 2.5950e+02, 7.6446e-01],
+           │    │                    [5.0000e-01, 2.6050e+02, 7.7384e-01]...
+           │    └ Loss()
+           └ <silk.flow._FunctionCall object at 0x7f26474ac6a0>
+
+  File "/root/silk/silk/losses/info_nce/__init__.py", line 81, in __call__
+    return total_loss_reduction(
+           └ <function total_loss_reduction at 0x7f2668ebd7e0>
+
+  File "/root/silk/silk/losses/info_nce/__init__.py", line 27, in total_loss_reduction
+    loss_0 = jax_loss.total_loss(
+             │        └ <function total_loss at 0x7f2668ebd750>
+             └ <module 'silk.losses.info_nce.loss' from '/root/silk/silk/losses/info_nce/loss.py'>
+
+  File "/root/silk/silk/losses/info_nce/loss.py", line 420, in total_loss
+    loss_1, precision, recall = corr_matching_binary_cross_entropy(
+                                └ <function corr_matching_binary_cross_entropy at 0x7f2668ebd6c0>
+
+  File "/root/silk/silk/losses/info_nce/loss.py", line 277, in corr_matching_binary_cross_entropy
+    loss_0 = correct_mask_0 * torch.nn.functional.softplus(-logits_0) + (
+             │                │     │  │          │         └ tensor([[0.8400, 0.7798, 0.7059,  ..., 0.7729, 0.7721, 0.7685]],
+             │                │     │  │          │                  device='cuda:0')
+             │                │     │  │          └ <built-in function softplus>
+             │                │     │  └ <module 'torch.nn.functional' from '/usr/local/lib/python3.10/dist-packages/torch/nn/functional.py'>
+             │                │     └ <module 'torch.nn' from '/usr/local/lib/python3.10/dist-packages/torch/nn/__init__.py'>
+             │                └ <module 'torch' from '/usr/local/lib/python3.10/dist-packages/torch/__init__.py'>
+             └ tensor([[True, True, True,  ..., True, True, True]], device='cuda:0')
+
+RuntimeError: The size of tensor a (10001) must match the size of tensor b (425216) at non-singleton dimension 1
+2025-02-26 09:54:13.388 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 09:55:28.324 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 09:55:28.325 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 09:55:31.298 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 09:55:36.368 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 09:58:18.752 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 09:58:18.753 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 09:58:21.751 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 09:58:27.187 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 09:59:28.776 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 09:59:28.776 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 09:59:31.749 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 10:00:56.155 | SUCCESS  | silk.cli:_main:95 - main dispatch successfully executed
+2025-02-26 10:00:56.156 | SUCCESS  | silk.cli:_main:99 - formatter successfully converted output
+2025-02-26 10:00:56.156 | SUCCESS  | silk.cli:_main:101 - ran successfully in working directory : .
+2025-02-26 10:00:58.079 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 10:00:58.080 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 10:01:01.076 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 10:01:06.263 | ERROR    | silk.cli:main:111 - An error has been caught in function 'main', process 'MainProcess' (160489), thread 'MainThread' (140719271080384):
+Traceback (most recent call last):
+
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+           │         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+           │         └ <code object <module> at 0x7ffbc15cee40, file "/root/silk/silk/cli/__main__.py", line 1>
+           └ <function _run_code at 0x7ffbc206ef80>
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+         └ <code object <module> at 0x7ffbc15cee40, file "/root/silk/silk/cli/__main__.py", line 1>
+
+  File "/root/silk/silk/cli/__main__.py", line 24, in <module>
+    main()
+    └ <function main at 0x7ffbc0c66440>
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+    └ <function _run_hydra at 0x7ffbc160dd80>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+    └ <function _run_app at 0x7ffbc160de10>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+    └ <function run_and_report at 0x7ffbc160dcf0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+           └ <function _run_app.<locals>.<lambda> at 0x7ffbc0d1e9e0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+            │     └ <function Hydra.run at 0x7ffbc15572e0>
+            └ <hydra._internal.hydra.Hydra object at 0x7ffbc0ced990>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+          └ <function run_job at 0x7ffbc160cee0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+    │   │              │             └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │   │              └ <function main at 0x7ffbc0c663b0>
+    │   └ <property object at 0x7ffbc1637010>
+    └ JobReturn(overrides=['mode=train-silk'], cfg={'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'pytho...
+
+  File "/root/silk/silk/cli/__main__.py", line 21, in main
+    silk.cli.main(cfg)
+    │    │   │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │    │   └ <function main at 0x7ffbc0c65750>
+    │    └ <module 'silk.cli' from '/root/silk/silk/cli/__init__.py'>
+    └ <module 'silk' from '/root/silk/silk/__init__.py'>
+
+> File "/root/silk/silk/cli/__init__.py", line 111, in main
+    return _main(cfg, working_dir)
+           │     │    └ '.'
+           │     └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           └ <function _main at 0x7ffbc0c656c0>
+
+  File "/root/silk/silk/cli/__init__.py", line 94, in _main
+    output = _main_dispatch(cfg.mode.command, cfg)
+             │              │                 └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             │              └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             └ <function _main_dispatch at 0x7ffbc1ed9bd0>
+
+  File "/root/silk/silk/cli/__init__.py", line 69, in _main_dispatch
+    return module.main(cfg) #HERE GO SILK.CLI.TRAINING
+           │      │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           │      └ <function main at 0x7ffbc209a830>
+           └ <module 'silk.cli.training' from '/root/silk/silk/cli/training.py'>
+
+  File "/root/silk/silk/cli/training.py", line 90, in main
+    trainer.fit(model, train_loader, val_loader) #usually this becomes train
+    │       │   │      │             └ <torch.utils.data.dataloader.DataLoader object at 0x7ff986b640a0>
+    │       │   │      └ <torch.utils.data.dataloader.DataLoader object at 0x7ff961d74430>
+    │       │   └ SiLKRandomHomographies(
+    │       │       (_module): MixedModuleDict(
+    │       │         (_mods): ModuleDict(
+    │       │           (model): SiLKVGG(
+    │       │             (backbone): Pa...
+    │       └ <function Trainer.fit at 0x7ff986d079a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 737, in fit
+    self._call_and_handle_interrupt(
+    │    └ <function Trainer._call_and_handle_interrupt at 0x7ff986d07880>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 682, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           │           │       └ {}
+           │           └ (SiLKRandomHomographies(
+           │               (_module): MixedModuleDict(
+           │                 (_mods): ModuleDict(
+           │                   (model): SiLKVGG(
+           │                     (backbone): P...
+           └ <bound method Trainer._fit_impl of <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 772, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+    │    │    │                └ None
+    │    │    └ SiLKRandomHomographies(
+    │    │        (_module): MixedModuleDict(
+    │    │          (_mods): ModuleDict(
+    │    │            (model): SiLKVGG(
+    │    │              (backbone): Pa...
+    │    └ <function Trainer._run at 0x7ff986d1c3a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1195, in _run
+    self._dispatch()
+    │    └ <function Trainer._dispatch at 0x7ff986d1c5e0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1274, in _dispatch
+    self.training_type_plugin.start_training(self)
+    │    │                                   └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+    │    └ <property object at 0x7ff986d0f5b0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 202, in start_training
+    self._results = trainer.run_stage()
+    │    │          │       └ <function Trainer.run_stage at 0x7ff986d1c670>
+    │    │          └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+    │    └ None
+    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7ff986d51ba0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1284, in run_stage
+    return self._run_train()
+           │    └ <function Trainer._run_train at 0x7ff986d1c790>
+           └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1306, in _run_train
+    self._run_sanity_check(self.lightning_module)
+    │    │                 │    └ <property object at 0x7ff986d0fb00>
+    │    │                 └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+    │    └ <function Trainer._run_sanity_check at 0x7ff986d1c940>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1370, in _run_sanity_check
+    self._evaluation_loop.run()
+    │    └ <property object at 0x7ff986d24fe0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7ff986d51180>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ ()
+    │    └ <function EvaluationLoop.advance at 0x7ff986cb8d30>
+    └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7ff986d2a830>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 109, in advance
+    dl_outputs = self.epoch_loop.run(dataloader, dataloader_idx, dl_max_batches, self.num_dataloaders)
+                 │    │          │   │           │               │               │    └ <property object at 0x7ff989274130>
+                 │    │          │   │           │               │               └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7ff986d2a830>
+                 │    │          │   │           │               └ 1
+                 │    │          │   │           └ 0
+                 │    │          │   └ <pytorch_lightning.utilities.fetching.DataFetcher object at 0x7ff961b972e0>
+                 │    │          └ <function Loop.run at 0x7ff986e46b00>
+                 │    └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7ff986d2bd00>
+                 └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7ff986d2a830>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (<pytorch_lightning.utilities.fetching.DataFetcher object at 0x7ff961b972e0>, 0, 1, 1)
+    │    └ <function EvaluationEpochLoop.advance at 0x7ff986ca5e10>
+    └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7ff986d2bd00>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 123, in advance
+    output = self._evaluation_step(batch, batch_idx, dataloader_idx)
+             │    │                │      │          └ 0
+             │    │                │      └ 0
+             │    │                └ NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │    │                            [255, 255, 255,  ...,  32,  30,  29],
+             │    │                      ...
+             │    └ <function EvaluationEpochLoop._evaluation_step at 0x7ff986ca6290>
+             └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7ff986d2bd00>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 215, in _evaluation_step
+    output = self.trainer.accelerator.validation_step(step_kwargs)
+             │    │                                   └ OrderedDict([('batch', NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │    │                                               [255, 255, 255,  .....
+             │    └ <property object at 0x7ff986e033d0>
+             └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7ff986d2bd00>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 236, in validation_step
+    return self.training_type_plugin.validation_step(*step_kwargs.values())
+           │    │                    │                │           └ <method 'values' of 'collections.OrderedDict' objects>
+           │    │                    │                └ OrderedDict([('batch', NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                    │                            [255, 255, 255,  .....
+           │    │                    └ <function DDPPlugin.validation_step at 0x7ff9c9f05b40>
+           │    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7ff986d51ba0>
+           └ <pytorch_lightning.accelerators.gpu.GPUAccelerator object at 0x7ff986d51750>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/ddp.py", line 444, in validation_step
+    return self.model(*args, **kwargs)
+           │    │      │       └ {}
+           │    │      └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                  [255, 255, 255,  ...,  32,  30,  29],
+           │    │           ...
+           │    └ <property object at 0x7ff9c9ef91c0>
+           └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7ff986d51ba0>
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                       [255, 255, 255,  ...,  32,  30,  29],
+           │    │                ...
+           │    └ <function Module._call_impl at 0x7ffa6fdc45e0>
+           └ DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                         [255, 255, 255,  ...,  32,  30,  29],
+           │                  ...
+           └ <bound method DistributedDataParallel.forward of DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/parallel/distributed.py", line 1523, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+         │    │                 │         └ {}
+         │    │                 └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+         │    │                             [255, 255, 255,  ...,  32,  30,  29],
+         │    │                      ...
+         │    └ <function DistributedDataParallel._run_ddp_forward at 0x7ffa6fa04280>
+         └ DistributedDataParallel(
+             (module): LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/parallel/distributed.py", line 1359, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+           │            │         └ {}
+           │            └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                        [255, 255, 255,  ...,  32,  30,  29],
+           │                 ...
+           └ DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                       [255, 255, 255,  ...,  32,  30,  29],
+           │    │                ...
+           │    └ <function Module._call_impl at 0x7ffa6fdc45e0>
+           └ LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_module): MixedModuleDict(
+                   (_mods): ModuleDict(
+               ...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                         [255, 255, 255,  ...,  32,  30,  29],
+           │                  ...
+           └ <bound method _LightningModuleWrapperBase.forward of LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_mo...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/overrides/base.py", line 92, in forward
+    output = self.module.validation_step(*inputs, **kwargs)
+             │                            │         └ {}
+             │                            └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │                                        [255, 255, 255,  ...,  32,  30,  29],
+             │                                 ...
+             └ LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): MixedModuleDict(
+                     (_mods): ModuleDict(
+                 ...
+
+  File "/root/silk/silk/models/silk.py", line 502, in validation_step
+    return self._total_loss(
+           │    └ <function SiLKBase._total_loss at 0x7ff971733250>
+           └ SiLKRandomHomographies(
+               (_module): MixedModuleDict(
+                 (_mods): ModuleDict(
+                   (model): SiLKVGG(
+                     (backbone): Pa...
+
+  File "/root/silk/silk/models/silk.py", line 483, in _total_loss
+    self.log(f"{mode}.total.loss", loss)
+    │    │                         └ (tensor(nan, device='cuda:1'), tensor(nan, device='cuda:1'))
+    │    └ <function LightningModule.log at 0x7ff986d2d2d0>
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/lightning.py", line 409, in log
+    apply_to_collection(
+    └ <function apply_to_collection at 0x7ffa6e72c700>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/utilities/apply_func.py", line 92, in apply_to_collection
+    return function(data, *args, **kwargs)
+           │        │      │       └ {}
+           │        │      └ ('val.total.loss', (tensor(nan, device='cuda:1'), tensor(nan, device='cuda:1')))
+           │        └ (tensor(nan, device='cuda:1'), tensor(nan, device='cuda:1'))
+           └ <function LightningModule.__check_allowed at 0x7ff986d2d480>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/lightning.py", line 575, in __check_allowed
+    raise ValueError(f"`self.log({name}, {value})` was called, but `{type(v).__name__}` values cannot be logged")
+
+ValueError: `self.log(val.total.loss, (tensor(nan, device='cuda:1'), tensor(nan, device='cuda:1')))` was called, but `tuple` values cannot be logged
+2025-02-26 10:01:06.329 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 10:02:41.204 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 10:02:41.205 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 10:02:44.339 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 10:02:45.403 | ERROR    | silk.cli:main:111 - An error has been caught in function 'main', process 'MainProcess' (162277), thread 'MainThread' (140627171000768):
+Traceback (most recent call last):
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target
+    return _target_(*args, **kwargs)
+           │         │       └ {'loss': Loss(), 'contextualizer': None, 'ghost_similarity': None, 'learn_ghost_similarity': False, 'feature_downsampling_mod...
+           │         └ ()
+           └ <class 'silk.models.silk.SiLKRandomHomographies'>
+
+  File "/root/silk/silk/models/silk.py", line 546, in __init__
+    self._init_loss_flow(
+    │    └ <function SiLKBase._init_loss_flow at 0x7fe3ffe2eb90>
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+
+  File "/root/silk/silk/models/silk.py", line 345, in _init_loss_flow
+    self._loss_fn = self.flow.with_outputs(
+    │               │    └ <property object at 0x7fe40a46d030>
+    │               └ SiLKRandomHomographies(
+    │                   (_module): MixedModuleDict(
+    │                     (_mods): ModuleDict(
+    │                       (model): SiLKVGG(
+    │                         (backbone): Pa...
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+
+  File "/root/silk/silk/flow.py", line 250, in with_outputs
+    return FixedOutputFlow(self, outputs)
+           │               │     └ ('acontextual_descriptor_losskeypoint_loss',)
+           │               └ <silk.flow.Flow object at 0x7fe3fe78af50>
+           └ <class 'silk.flow.FixedOutputFlow'>
+
+  File "/root/silk/silk/flow.py", line 290, in __init__
+    self._tape = self._flow.get_tape(outputs)
+    │            │    │     │        └ ('acontextual_descriptor_losskeypoint_loss',)
+    │            │    │     └ <function Flow.get_tape at 0x7fe40a4701f0>
+    │            │    └ <silk.flow.Flow object at 0x7fe3fe78af50>
+    │            └ <silk.flow.FixedOutputFlow object at 0x7fe3fe78aec0>
+    └ <silk.flow.FixedOutputFlow object at 0x7fe3fe78aec0>
+
+  File "/root/silk/silk/flow.py", line 185, in get_tape
+    output_indexes = set(  # noqa: C401
+
+  File "/root/silk/silk/flow.py", line 186, in <genexpr>
+    self._name_to_index[name] for name in outputs
+    │    │              │         └ 'acontextual_descriptor_losskeypoint_loss'
+    │    │              └ 'acontextual_descriptor_losskeypoint_loss'
+    │    └ {'batch': 0, 'use_image_aug': 1, 'images_1': 3, 'images_2': 4, 'image_shape': 5, 'pose_gt_forward': 6, 'pose_gt_backward': 7,...
+    └ <silk.flow.Flow object at 0x7fe3fe78af50>
+
+KeyError: 'acontextual_descriptor_losskeypoint_loss'
+
+
+The above exception was the direct cause of the following exception:
+
+
+Traceback (most recent call last):
+
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+           │         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+           │         └ <code object <module> at 0x7fe64fc6ee40, file "/root/silk/silk/cli/__main__.py", line 1>
+           └ <function _run_code at 0x7fe6506f6f80>
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+         └ <code object <module> at 0x7fe64fc6ee40, file "/root/silk/silk/cli/__main__.py", line 1>
+
+  File "/root/silk/silk/cli/__main__.py", line 24, in <module>
+    main()
+    └ <function main at 0x7fe64f302440>
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+    └ <function _run_hydra at 0x7fe64fcadd80>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+    └ <function _run_app at 0x7fe64fcade10>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+    └ <function run_and_report at 0x7fe64fcadcf0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+           └ <function _run_app.<locals>.<lambda> at 0x7fe64f1729e0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+            │     └ <function Hydra.run at 0x7fe64fbf32e0>
+            └ <hydra._internal.hydra.Hydra object at 0x7fe64f389990>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+          └ <function run_job at 0x7fe64fcacee0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+    │   │              │             └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │   │              └ <function main at 0x7fe64f3023b0>
+    │   └ <property object at 0x7fe64fcd7100>
+    └ JobReturn(overrides=['mode=train-silk'], cfg={'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'pytho...
+
+  File "/root/silk/silk/cli/__main__.py", line 21, in main
+    silk.cli.main(cfg)
+    │    │   │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │    │   └ <function main at 0x7fe64f301750>
+    │    └ <module 'silk.cli' from '/root/silk/silk/cli/__init__.py'>
+    └ <module 'silk' from '/root/silk/silk/__init__.py'>
+
+> File "/root/silk/silk/cli/__init__.py", line 111, in main
+    return _main(cfg, working_dir)
+           │     │    └ '.'
+           │     └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           └ <function _main at 0x7fe64f3016c0>
+
+  File "/root/silk/silk/cli/__init__.py", line 94, in _main
+    output = _main_dispatch(cfg.mode.command, cfg)
+             │              │                 └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             │              └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             └ <function _main_dispatch at 0x7fe650561bd0>
+
+  File "/root/silk/silk/cli/__init__.py", line 69, in _main_dispatch
+    return module.main(cfg) #HERE GO SILK.CLI.TRAINING
+           │      │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           │      └ <function main at 0x7fe650722830>
+           └ <module 'silk.cli.training' from '/root/silk/silk/cli/training.py'>
+
+  File "/root/silk/silk/cli/training.py", line 49, in main
+    model = instantiate_and_ensure_is_instance(config.mode.model, pl.LightningModule)
+            │                                  │                  │  └ <class 'pytorch_lightning.core.lightning.LightningModule'>
+            │                                  │                  └ <module 'pytorch_lightning' from '/usr/local/lib/python3.10/dist-packages/pytorch_lightning/__init__.py'>
+            │                                  └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+            └ <function instantiate_and_ensure_is_instance at 0x7fe64f301d80>
+
+  File "/root/silk/silk/config/core.py", line 164, in instantiate_and_ensure_is_instance
+    instance = instantiate(cfg)
+               │           └ {'loss': {'_target_': 'silk.losses.info_nce.Loss', 'block_size': 5400, 'device': 'cuda:0', 'temperature': 0.1}, 'contextualiz...
+               └ <function instantiate at 0x7fe64f301e10>
+
+  File "/root/silk/silk/config/core.py", line 173, in instantiate
+    return hydra.utils.instantiate(cfg)
+           │     │     │           └ {'loss': {'_target_': 'silk.losses.info_nce.Loss', 'block_size': 5400, 'device': 'cuda:0', 'temperature': 0.1}, 'contextualiz...
+           │     │     └ <function instantiate at 0x7fe64fcae560>
+           │     └ <module 'hydra.utils' from '/usr/local/lib/python3.10/dist-packages/hydra/utils.py'>
+           └ <module 'hydra' from '/usr/local/lib/python3.10/dist-packages/hydra/__init__.py'>
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/instantiate/_instantiate2.py", line 226, in instantiate
+    return instantiate_node(
+           └ <function instantiate_node at 0x7fe64fcae680>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/instantiate/_instantiate2.py", line 347, in instantiate_node
+    return _call_target(_target_, partial, args, kwargs, full_key)
+           │            │         │        │     │       └ 'mode.model'
+           │            │         │        │     └ {'loss': Loss(), 'contextualizer': None, 'ghost_similarity': None, 'learn_ghost_similarity': False, 'feature_downsampling_mod...
+           │            │         │        └ ()
+           │            │         └ False
+           │            └ <class 'silk.models.silk.SiLKRandomHomographies'>
+           └ <function _call_target at 0x7fe64fcae320>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/instantiate/_instantiate2.py", line 97, in _call_target
+    raise InstantiationException(msg) from e
+          │                      └ "Error in call to target 'silk.models.silk.SiLKRandomHomographies':\nKeyError('acontextual_descriptor_losskeypoint_loss')\nfu...
+          └ <class 'hydra.errors.InstantiationException'>
+
+hydra.errors.InstantiationException: Error in call to target 'silk.models.silk.SiLKRandomHomographies':
+KeyError('acontextual_descriptor_losskeypoint_loss')
+full_key: mode.model
+2025-02-26 10:02:45.413 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 10:02:58.026 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 10:02:58.027 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 10:03:01.058 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 10:03:08.563 | ERROR    | silk.cli:main:111 - An error has been caught in function 'main', process 'MainProcess' (162408), thread 'MainThread' (140103435833792):
+Traceback (most recent call last):
+
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+           │         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+           │         └ <code object <module> at 0x7f6c5eb6ee40, file "/root/silk/silk/cli/__main__.py", line 1>
+           └ <function _run_code at 0x7f6c5f62ef80>
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+         └ <code object <module> at 0x7f6c5eb6ee40, file "/root/silk/silk/cli/__main__.py", line 1>
+
+  File "/root/silk/silk/cli/__main__.py", line 24, in <module>
+    main()
+    └ <function main at 0x7f6c5e22e440>
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+    └ <function _run_hydra at 0x7f6c5ebadd80>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+    └ <function _run_app at 0x7f6c5ebade10>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+    └ <function run_and_report at 0x7f6c5ebadcf0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+           └ <function _run_app.<locals>.<lambda> at 0x7f6c5e0a69e0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+            │     └ <function Hydra.run at 0x7f6c5eaf32e0>
+            └ <hydra._internal.hydra.Hydra object at 0x7f6c5e2b5990>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+          └ <function run_job at 0x7f6c5ebacee0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+    │   │              │             └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │   │              └ <function main at 0x7f6c5e22e3b0>
+    │   └ <property object at 0x7f6c5f0d9f30>
+    └ JobReturn(overrides=['mode=train-silk'], cfg={'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'pytho...
+
+  File "/root/silk/silk/cli/__main__.py", line 21, in main
+    silk.cli.main(cfg)
+    │    │   │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │    │   └ <function main at 0x7f6c5e22d750>
+    │    └ <module 'silk.cli' from '/root/silk/silk/cli/__init__.py'>
+    └ <module 'silk' from '/root/silk/silk/__init__.py'>
+
+> File "/root/silk/silk/cli/__init__.py", line 111, in main
+    return _main(cfg, working_dir)
+           │     │    └ '.'
+           │     └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           └ <function _main at 0x7f6c5e22d6c0>
+
+  File "/root/silk/silk/cli/__init__.py", line 94, in _main
+    output = _main_dispatch(cfg.mode.command, cfg)
+             │              │                 └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             │              └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             └ <function _main_dispatch at 0x7f6c5f495bd0>
+
+  File "/root/silk/silk/cli/__init__.py", line 69, in _main_dispatch
+    return module.main(cfg) #HERE GO SILK.CLI.TRAINING
+           │      │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           │      └ <function main at 0x7f6c5f65a830>
+           └ <module 'silk.cli.training' from '/root/silk/silk/cli/training.py'>
+
+  File "/root/silk/silk/cli/training.py", line 90, in main
+    trainer.fit(model, train_loader, val_loader) #usually this becomes train
+    │       │   │      │             └ <torch.utils.data.dataloader.DataLoader object at 0x7f6c5df01e10>
+    │       │   │      └ <torch.utils.data.dataloader.DataLoader object at 0x7f6a053e1570>
+    │       │   └ SiLKRandomHomographies(
+    │       │       (_module): MixedModuleDict(
+    │       │         (_mods): ModuleDict(
+    │       │           (model): SiLKVGG(
+    │       │             (backbone): Pa...
+    │       └ <function Trainer.fit at 0x7f6a242ff9a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 737, in fit
+    self._call_and_handle_interrupt(
+    │    └ <function Trainer._call_and_handle_interrupt at 0x7f6a242ff880>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 682, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           │           │       └ {}
+           │           └ (SiLKRandomHomographies(
+           │               (_module): MixedModuleDict(
+           │                 (_mods): ModuleDict(
+           │                   (model): SiLKVGG(
+           │                     (backbone): P...
+           └ <bound method Trainer._fit_impl of <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 772, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+    │    │    │                └ None
+    │    │    └ SiLKRandomHomographies(
+    │    │        (_module): MixedModuleDict(
+    │    │          (_mods): ModuleDict(
+    │    │            (model): SiLKVGG(
+    │    │              (backbone): Pa...
+    │    └ <function Trainer._run at 0x7f6a241143a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1195, in _run
+    self._dispatch()
+    │    └ <function Trainer._dispatch at 0x7f6a241145e0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1274, in _dispatch
+    self.training_type_plugin.start_training(self)
+    │    │                                   └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+    │    └ <property object at 0x7f6a24303a60>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 202, in start_training
+    self._results = trainer.run_stage()
+    │    │          │       └ <function Trainer.run_stage at 0x7f6a24114670>
+    │    │          └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+    │    └ None
+    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7f6a05194eb0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1284, in run_stage
+    return self._run_train()
+           │    └ <function Trainer._run_train at 0x7f6a24114790>
+           └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1314, in _run_train
+    self.fit_loop.run()
+    │    └ <property object at 0x7f6a24119530>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f6a05196bf0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ ()
+    │    └ <function FitLoop.advance at 0x7f6a242b2cb0>
+    └ <pytorch_lightning.loops.fit_loop.FitLoop object at 0x7f6a05197f70>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/fit_loop.py", line 234, in advance
+    self.epoch_loop.run(data_fetcher)
+    │    │          │   └ <pytorch_lightning.utilities.fetching.DataFetcher object at 0x7f6a0525abc0>
+    │    │          └ <function Loop.run at 0x7f6a24242b00>
+    │    └ <pytorch_lightning.loops.epoch.training_epoch_loop.TrainingEpochLoop object at 0x7f6a051958a0>
+    └ <pytorch_lightning.loops.fit_loop.FitLoop object at 0x7f6a05197f70>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (<pytorch_lightning.utilities.fetching.DataFetcher object at 0x7f6a0525abc0>,)
+    │    └ <function TrainingEpochLoop.advance at 0x7f6a2429fac0>
+    └ <pytorch_lightning.loops.epoch.training_epoch_loop.TrainingEpochLoop object at 0x7f6a051958a0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/training_epoch_loop.py", line 195, in advance
+    batch_output = self.batch_loop.run(batch, batch_idx)
+                   │    │          │   │      └ 0
+                   │    │          │   └ NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+                   │    │          │               [ 44,  44,  44,  ...,   5,   6,   5],
+                   │    │          │         ...
+                   │    │          └ <function Loop.run at 0x7f6a24242b00>
+                   │    └ <pytorch_lightning.loops.batch.training_batch_loop.TrainingBatchLoop object at 0x7f6a05197b50>
+                   └ <pytorch_lightning.loops.epoch.training_epoch_loop.TrainingEpochLoop object at 0x7f6a051958a0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+    │    │                    [ 44,  44,  44,  ...,   5,   6,   5],
+    │    │             ...
+    │    └ <function TrainingBatchLoop.advance at 0x7f6a2429c820>
+    └ <pytorch_lightning.loops.batch.training_batch_loop.TrainingBatchLoop object at 0x7f6a05197b50>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/batch/training_batch_loop.py", line 88, in advance
+    outputs = self.optimizer_loop.run(split_batch, optimizers, batch_idx)
+              │    │              │   │            │           └ 0
+              │    │              │   │            └ [(0, Adam (
+              │    │              │   │              Parameter Group 0
+              │    │              │   │                  amsgrad: False
+              │    │              │   │                  betas: [0.9, 0.999]
+              │    │              │   │                  capturable: False
+              │    │              │   │                  differentiable: False
+              │    │              │   │                  ...
+              │    │              │   └ NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+              │    │              │               [ 44,  44,  44,  ...,   5,   6,   5],
+              │    │              │         ...
+              │    │              └ <function Loop.run at 0x7f6a24242b00>
+              │    └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f6a051942b0>
+              └ <pytorch_lightning.loops.batch.training_batch_loop.TrainingBatchLoop object at 0x7f6a05197b50>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+    │    │                    [ 44,  44,  44,  ...,   5,   6,   5],
+    │    │             ...
+    │    └ <function OptimizerLoop.advance at 0x7f6a2429c0d0>
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f6a051942b0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 215, in advance
+    result = self._run_optimization(
+             │    └ <function OptimizerLoop._run_optimization at 0x7f6a2429c1f0>
+             └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f6a051942b0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 266, in _run_optimization
+    self._optimizer_step(optimizer, opt_idx, batch_idx, closure)
+    │    │               │          │        │          └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+    │    │               │          │        └ 0
+    │    │               │          └ 0
+    │    │               └ Adam (
+    │    │                 Parameter Group 0
+    │    │                     amsgrad: False
+    │    │                     betas: [0.9, 0.999]
+    │    │                     capturable: False
+    │    │                     differentiable: False
+    │    │                     eps: ...
+    │    └ <function OptimizerLoop._optimizer_step at 0x7f6a2429c5e0>
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f6a051942b0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 378, in _optimizer_step
+    lightning_module.optimizer_step(
+    │                └ <function LightningModule.optimizer_step at 0x7f6a2411e290>
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/lightning.py", line 1664, in optimizer_step
+    optimizer.step(closure=optimizer_closure)
+    │         │            └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+    │         └ <function LightningOptimizer.step at 0x7f6a6742a710>
+    └ LightningAdam (
+      Parameter Group 0
+          amsgrad: False
+          betas: [0.9, 0.999]
+          capturable: False
+          differentiable: False
+      ...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/optimizer.py", line 164, in step
+    trainer.accelerator.optimizer_step(self._optimizer, self._optimizer_idx, closure, **kwargs)
+    │                                  │    │           │    │               │          └ {}
+    │                                  │    │           │    │               └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+    │                                  │    │           │    └ 0
+    │                                  │    │           └ LightningAdam (
+    │                                  │    │             Parameter Group 0
+    │                                  │    │                 amsgrad: False
+    │                                  │    │                 betas: [0.9, 0.999]
+    │                                  │    │                 capturable: False
+    │                                  │    │                 differentiable: False
+    │                                  │    │             ...
+    │                                  │    └ Adam (
+    │                                  │      Parameter Group 0
+    │                                  │          amsgrad: False
+    │                                  │          betas: [0.9, 0.999]
+    │                                  │          capturable: False
+    │                                  │          differentiable: False
+    │                                  │          eps: ...
+    │                                  └ LightningAdam (
+    │                                    Parameter Group 0
+    │                                        amsgrad: False
+    │                                        betas: [0.9, 0.999]
+    │                                        capturable: False
+    │                                        differentiable: False
+    │                                    ...
+    └ <weakproxy at 0x7f6a0ffa6b60 to Trainer at 0x7f6a05196bf0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 336, in optimizer_step
+    self.precision_plugin.optimizer_step(model, optimizer, opt_idx, closure, **kwargs)
+    │    │                │              │      │          │        │          └ {}
+    │    │                │              │      │          │        └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+    │    │                │              │      │          └ 0
+    │    │                │              │      └ Adam (
+    │    │                │              │        Parameter Group 0
+    │    │                │              │            amsgrad: False
+    │    │                │              │            betas: [0.9, 0.999]
+    │    │                │              │            capturable: False
+    │    │                │              │            differentiable: False
+    │    │                │              │            eps: ...
+    │    │                │              └ SiLKRandomHomographies(
+    │    │                │                  (_module): MixedModuleDict(
+    │    │                │                    (_mods): ModuleDict(
+    │    │                │                      (model): SiLKVGG(
+    │    │                │                        (backbone): Pa...
+    │    │                └ <function PrecisionPlugin.optimizer_step at 0x7f6b0c6dc700>
+    │    └ <pytorch_lightning.plugins.precision.precision_plugin.PrecisionPlugin object at 0x7f6a05196110>
+    └ <pytorch_lightning.accelerators.gpu.GPUAccelerator object at 0x7f6a05194190>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 163, in optimizer_step
+    optimizer.step(closure=closure, **kwargs)
+    │         │            │          └ {}
+    │         │            └ functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_plugin.Precis...
+    │         └ <function Adam.step at 0x7f6a05408c10>
+    └ Adam (
+      Parameter Group 0
+          amsgrad: False
+          betas: [0.9, 0.999]
+          capturable: False
+          differentiable: False
+          eps: ...
+  File "/usr/local/lib/python3.10/dist-packages/torch/optim/optimizer.py", line 385, in wrapper
+    out = func(*args, **kwargs)
+          │     │       └ {'closure': functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_p...
+          │     └ (Adam (
+          │       Parameter Group 0
+          │           amsgrad: False
+          │           betas: [0.9, 0.999]
+          │           capturable: False
+          │           differentiable: False
+          │           eps:...
+          └ <function Adam.step at 0x7f6b0d04bd90>
+  File "/usr/local/lib/python3.10/dist-packages/torch/optim/optimizer.py", line 76, in _use_grad
+    ret = func(self, *args, **kwargs)
+          │    │      │       └ {'closure': functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_p...
+          │    │      └ ()
+          │    └ Adam (
+          │      Parameter Group 0
+          │          amsgrad: False
+          │          betas: [0.9, 0.999]
+          │          capturable: False
+          │          differentiable: False
+          │          eps: ...
+          └ <function Adam.step at 0x7f6b0d04bd00>
+  File "/usr/local/lib/python3.10/dist-packages/torch/optim/adam.py", line 146, in step
+    loss = closure()
+           └ functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_plugin.Precis...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 148, in _wrap_closure
+    closure_result = closure()
+                     └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 160, in __call__
+    self._result = self.closure(*args, **kwargs)
+    │    │         │    │        │       └ {}
+    │    │         │    │        └ ()
+    │    │         │    └ <function Closure.closure at 0x7f6a2428bb50>
+    │    │         └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+    │    └ None
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 142, in closure
+    step_output = self._step_fn()
+                  │    └ functools.partial(<bound method OptimizerLoop._training_step of <pytorch_lightning.loops.optimization.optimizer_loop.Optimize...
+                  └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f6a04ea78e0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 444, in _training_step
+    result = self.output_result_cls.from_training_step_output(
+             │    │                 └ <classmethod(<function ClosureResult.from_training_step_output at 0x7f6a2428b7f0>)>
+             │    └ <class 'pytorch_lightning.loops.optimization.optimizer_loop.ClosureResult'>
+             └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f6a051942b0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 85, in from_training_step_output
+    raise MisconfigurationException(
+          └ <class 'pytorch_lightning.utilities.exceptions.MisconfigurationException'>
+
+pytorch_lightning.utilities.exceptions.MisconfigurationException: In automatic optimization, `training_step` must return a Tensor, a dict, or None (where the step will be skipped).
+2025-02-26 10:03:08.595 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 10:03:56.953 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 10:03:56.954 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 10:03:59.996 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 10:04:07.239 | ERROR    | silk.cli:main:111 - An error has been caught in function 'main', process 'MainProcess' (165780), thread 'MainThread' (139987897393600):
+Traceback (most recent call last):
+
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+           │         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+           │         └ <code object <module> at 0x7f517816ae40, file "/root/silk/silk/cli/__main__.py", line 1>
+           └ <function _run_code at 0x7f5178c2af80>
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+         └ <code object <module> at 0x7f517816ae40, file "/root/silk/silk/cli/__main__.py", line 1>
+
+  File "/root/silk/silk/cli/__main__.py", line 24, in <module>
+    main()
+    └ <function main at 0x7f517782a440>
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+    └ <function _run_hydra at 0x7f51781a9d80>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+    └ <function _run_app at 0x7f51781a9e10>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+    └ <function run_and_report at 0x7f51781a9cf0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+           └ <function _run_app.<locals>.<lambda> at 0x7f517769a9e0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+            │     └ <function Hydra.run at 0x7f51780ef2e0>
+            └ <hydra._internal.hydra.Hydra object at 0x7f51778b1930>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+          └ <function run_job at 0x7f51781a8ee0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+    │   │              │             └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │   │              └ <function main at 0x7f517782a3b0>
+    │   └ <property object at 0x7f517885e1b0>
+    └ JobReturn(overrides=['mode=train-silk'], cfg={'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'pytho...
+
+  File "/root/silk/silk/cli/__main__.py", line 21, in main
+    silk.cli.main(cfg)
+    │    │   │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │    │   └ <function main at 0x7f5177829750>
+    │    └ <module 'silk.cli' from '/root/silk/silk/cli/__init__.py'>
+    └ <module 'silk' from '/root/silk/silk/__init__.py'>
+
+> File "/root/silk/silk/cli/__init__.py", line 111, in main
+    return _main(cfg, working_dir)
+           │     │    └ '.'
+           │     └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           └ <function _main at 0x7f51778296c0>
+
+  File "/root/silk/silk/cli/__init__.py", line 94, in _main
+    output = _main_dispatch(cfg.mode.command, cfg)
+             │              │                 └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             │              └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             └ <function _main_dispatch at 0x7f5178a91bd0>
+
+  File "/root/silk/silk/cli/__init__.py", line 69, in _main_dispatch
+    return module.main(cfg) #HERE GO SILK.CLI.TRAINING
+           │      │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           │      └ <function main at 0x7f5178c52830>
+           └ <module 'silk.cli.training' from '/root/silk/silk/cli/training.py'>
+
+  File "/root/silk/silk/cli/training.py", line 90, in main
+    trainer.fit(model, train_loader, val_loader) #usually this becomes train
+    │       │   │      │             └ <torch.utils.data.dataloader.DataLoader object at 0x7f51774f5b70>
+    │       │   │      └ <torch.utils.data.dataloader.DataLoader object at 0x7f4f201bd180>
+    │       │   └ SiLKRandomHomographies(
+    │       │       (_module): MixedModuleDict(
+    │       │         (_mods): ModuleDict(
+    │       │           (model): SiLKVGG(
+    │       │             (backbone): Pa...
+    │       └ <function Trainer.fit at 0x7f4f3d8d39a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 737, in fit
+    self._call_and_handle_interrupt(
+    │    └ <function Trainer._call_and_handle_interrupt at 0x7f4f3d8d3880>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 682, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           │           │       └ {}
+           │           └ (SiLKRandomHomographies(
+           │               (_module): MixedModuleDict(
+           │                 (_mods): ModuleDict(
+           │                   (model): SiLKVGG(
+           │                     (backbone): P...
+           └ <bound method Trainer._fit_impl of <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 772, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+    │    │    │                └ None
+    │    │    └ SiLKRandomHomographies(
+    │    │        (_module): MixedModuleDict(
+    │    │          (_mods): ModuleDict(
+    │    │            (model): SiLKVGG(
+    │    │              (backbone): Pa...
+    │    └ <function Trainer._run at 0x7f4f3d8e83a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1195, in _run
+    self._dispatch()
+    │    └ <function Trainer._dispatch at 0x7f4f3d8e85e0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1274, in _dispatch
+    self.training_type_plugin.start_training(self)
+    │    │                                   └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+    │    └ <property object at 0x7f4f3d8d7790>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 202, in start_training
+    self._results = trainer.run_stage()
+    │    │          │       └ <function Trainer.run_stage at 0x7f4f3d8e8670>
+    │    │          └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+    │    └ None
+    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7f4f0c7e1900>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1284, in run_stage
+    return self._run_train()
+           │    └ <function Trainer._run_train at 0x7f4f3d8e8790>
+           └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1314, in _run_train
+    self.fit_loop.run()
+    │    └ <property object at 0x7f4f3d8f1260>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7f4f0c7e0580>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ ()
+    │    └ <function FitLoop.advance at 0x7f4f3d886cb0>
+    └ <pytorch_lightning.loops.fit_loop.FitLoop object at 0x7f4f0c7e30d0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/fit_loop.py", line 234, in advance
+    self.epoch_loop.run(data_fetcher)
+    │    │          │   └ <pytorch_lightning.utilities.fetching.DataFetcher object at 0x7f4f0c789cf0>
+    │    │          └ <function Loop.run at 0x7f4f3da12b00>
+    │    └ <pytorch_lightning.loops.epoch.training_epoch_loop.TrainingEpochLoop object at 0x7f4f0c7e0130>
+    └ <pytorch_lightning.loops.fit_loop.FitLoop object at 0x7f4f0c7e30d0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (<pytorch_lightning.utilities.fetching.DataFetcher object at 0x7f4f0c789cf0>,)
+    │    └ <function TrainingEpochLoop.advance at 0x7f4f3d873ac0>
+    └ <pytorch_lightning.loops.epoch.training_epoch_loop.TrainingEpochLoop object at 0x7f4f0c7e0130>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/training_epoch_loop.py", line 195, in advance
+    batch_output = self.batch_loop.run(batch, batch_idx)
+                   │    │          │   │      └ 0
+                   │    │          │   └ NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+                   │    │          │               [ 44,  44,  44,  ...,   5,   6,   5],
+                   │    │          │         ...
+                   │    │          └ <function Loop.run at 0x7f4f3da12b00>
+                   │    └ <pytorch_lightning.loops.batch.training_batch_loop.TrainingBatchLoop object at 0x7f4f0c7e19f0>
+                   └ <pytorch_lightning.loops.epoch.training_epoch_loop.TrainingEpochLoop object at 0x7f4f0c7e0130>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+    │    │                    [ 44,  44,  44,  ...,   5,   6,   5],
+    │    │             ...
+    │    └ <function TrainingBatchLoop.advance at 0x7f4f3d870820>
+    └ <pytorch_lightning.loops.batch.training_batch_loop.TrainingBatchLoop object at 0x7f4f0c7e19f0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/batch/training_batch_loop.py", line 88, in advance
+    outputs = self.optimizer_loop.run(split_batch, optimizers, batch_idx)
+              │    │              │   │            │           └ 0
+              │    │              │   │            └ [(0, Adam (
+              │    │              │   │              Parameter Group 0
+              │    │              │   │                  amsgrad: False
+              │    │              │   │                  betas: [0.9, 0.999]
+              │    │              │   │                  capturable: False
+              │    │              │   │                  differentiable: False
+              │    │              │   │                  ...
+              │    │              │   └ NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+              │    │              │               [ 44,  44,  44,  ...,   5,   6,   5],
+              │    │              │         ...
+              │    │              └ <function Loop.run at 0x7f4f3da12b00>
+              │    └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f4f0c7e0eb0>
+              └ <pytorch_lightning.loops.batch.training_batch_loop.TrainingBatchLoop object at 0x7f4f0c7e19f0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (NamedContext({'image_1': tensor([[[[ 45,  45,  45,  ...,   8,   8,   7],
+    │    │                    [ 44,  44,  44,  ...,   5,   6,   5],
+    │    │             ...
+    │    └ <function OptimizerLoop.advance at 0x7f4f3d8700d0>
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f4f0c7e0eb0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 215, in advance
+    result = self._run_optimization(
+             │    └ <function OptimizerLoop._run_optimization at 0x7f4f3d8701f0>
+             └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f4f0c7e0eb0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 266, in _run_optimization
+    self._optimizer_step(optimizer, opt_idx, batch_idx, closure)
+    │    │               │          │        │          └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+    │    │               │          │        └ 0
+    │    │               │          └ 0
+    │    │               └ Adam (
+    │    │                 Parameter Group 0
+    │    │                     amsgrad: False
+    │    │                     betas: [0.9, 0.999]
+    │    │                     capturable: False
+    │    │                     differentiable: False
+    │    │                     eps: ...
+    │    └ <function OptimizerLoop._optimizer_step at 0x7f4f3d8705e0>
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f4f0c7e0eb0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 378, in _optimizer_step
+    lightning_module.optimizer_step(
+    │                └ <function LightningModule.optimizer_step at 0x7f4f3d8fa290>
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/lightning.py", line 1664, in optimizer_step
+    optimizer.step(closure=optimizer_closure)
+    │         │            └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+    │         └ <function LightningOptimizer.step at 0x7f4f80a12710>
+    └ LightningAdam (
+      Parameter Group 0
+          amsgrad: False
+          betas: [0.9, 0.999]
+          capturable: False
+          differentiable: False
+      ...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/optimizer.py", line 164, in step
+    trainer.accelerator.optimizer_step(self._optimizer, self._optimizer_idx, closure, **kwargs)
+    │                                  │    │           │    │               │          └ {}
+    │                                  │    │           │    │               └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+    │                                  │    │           │    └ 0
+    │                                  │    │           └ LightningAdam (
+    │                                  │    │             Parameter Group 0
+    │                                  │    │                 amsgrad: False
+    │                                  │    │                 betas: [0.9, 0.999]
+    │                                  │    │                 capturable: False
+    │                                  │    │                 differentiable: False
+    │                                  │    │             ...
+    │                                  │    └ Adam (
+    │                                  │      Parameter Group 0
+    │                                  │          amsgrad: False
+    │                                  │          betas: [0.9, 0.999]
+    │                                  │          capturable: False
+    │                                  │          differentiable: False
+    │                                  │          eps: ...
+    │                                  └ LightningAdam (
+    │                                    Parameter Group 0
+    │                                        amsgrad: False
+    │                                        betas: [0.9, 0.999]
+    │                                        capturable: False
+    │                                        differentiable: False
+    │                                    ...
+    └ <weakproxy at 0x7f4f200f9e40 to Trainer at 0x7f4f0c7e0580>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 336, in optimizer_step
+    self.precision_plugin.optimizer_step(model, optimizer, opt_idx, closure, **kwargs)
+    │    │                │              │      │          │        │          └ {}
+    │    │                │              │      │          │        └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+    │    │                │              │      │          └ 0
+    │    │                │              │      └ Adam (
+    │    │                │              │        Parameter Group 0
+    │    │                │              │            amsgrad: False
+    │    │                │              │            betas: [0.9, 0.999]
+    │    │                │              │            capturable: False
+    │    │                │              │            differentiable: False
+    │    │                │              │            eps: ...
+    │    │                │              └ SiLKRandomHomographies(
+    │    │                │                  (_module): MixedModuleDict(
+    │    │                │                    (_mods): ModuleDict(
+    │    │                │                      (model): SiLKVGG(
+    │    │                │                        (backbone): Pa...
+    │    │                └ <function PrecisionPlugin.optimizer_step at 0x7f4f80afc700>
+    │    └ <pytorch_lightning.plugins.precision.precision_plugin.PrecisionPlugin object at 0x7f4f0c7e2110>
+    └ <pytorch_lightning.accelerators.gpu.GPUAccelerator object at 0x7f4f0c7e0280>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 163, in optimizer_step
+    optimizer.step(closure=closure, **kwargs)
+    │         │            │          └ {}
+    │         │            └ functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_plugin.Precis...
+    │         └ <function Adam.step at 0x7f4f201e4c10>
+    └ Adam (
+      Parameter Group 0
+          amsgrad: False
+          betas: [0.9, 0.999]
+          capturable: False
+          differentiable: False
+          eps: ...
+  File "/usr/local/lib/python3.10/dist-packages/torch/optim/optimizer.py", line 385, in wrapper
+    out = func(*args, **kwargs)
+          │     │       └ {'closure': functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_p...
+          │     └ (Adam (
+          │       Parameter Group 0
+          │           amsgrad: False
+          │           betas: [0.9, 0.999]
+          │           capturable: False
+          │           differentiable: False
+          │           eps:...
+          └ <function Adam.step at 0x7f5026643d90>
+  File "/usr/local/lib/python3.10/dist-packages/torch/optim/optimizer.py", line 76, in _use_grad
+    ret = func(self, *args, **kwargs)
+          │    │      │       └ {'closure': functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_p...
+          │    │      └ ()
+          │    └ Adam (
+          │      Parameter Group 0
+          │          amsgrad: False
+          │          betas: [0.9, 0.999]
+          │          capturable: False
+          │          differentiable: False
+          │          eps: ...
+          └ <function Adam.step at 0x7f5026643d00>
+  File "/usr/local/lib/python3.10/dist-packages/torch/optim/adam.py", line 146, in step
+    loss = closure()
+           └ functools.partial(<bound method PrecisionPlugin._wrap_closure of <pytorch_lightning.plugins.precision.precision_plugin.Precis...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 148, in _wrap_closure
+    closure_result = closure()
+                     └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 160, in __call__
+    self._result = self.closure(*args, **kwargs)
+    │    │         │    │        │       └ {}
+    │    │         │    │        └ ()
+    │    │         │    └ <function Closure.closure at 0x7f4f3d85fb50>
+    │    │         └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+    │    └ None
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 155, in closure
+    self._backward_fn(step_output.closure_loss)
+    │    │            │           └ tensor(0.)
+    │    │            └ ClosureResult(closure_loss=tensor(0.), loss=tensor(0.), extra={})
+    │    └ <function OptimizerLoop._make_backward_fn.<locals>.backward_fn at 0x7f50262170a0>
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.Closure object at 0x7f4f0c3c2ce0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/optimization/optimizer_loop.py", line 327, in backward_fn
+    self.trainer.accelerator.backward(loss, optimizer, opt_idx)
+    │    │                            │     │          └ 0
+    │    │                            │     └ Adam (
+    │    │                            │       Parameter Group 0
+    │    │                            │           amsgrad: False
+    │    │                            │           betas: [0.9, 0.999]
+    │    │                            │           capturable: False
+    │    │                            │           differentiable: False
+    │    │                            │           eps: ...
+    │    │                            └ tensor(0.)
+    │    └ <property object at 0x7f4f3d9cf4c0>
+    └ <pytorch_lightning.loops.optimization.optimizer_loop.OptimizerLoop object at 0x7f4f0c7e0eb0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 311, in backward
+    self.precision_plugin.backward(self.lightning_module, closure_loss, *args, **kwargs)
+    │    │                │        │    │                 │              │       └ {}
+    │    │                │        │    │                 │              └ (Adam (
+    │    │                │        │    │                 │                Parameter Group 0
+    │    │                │        │    │                 │                    amsgrad: False
+    │    │                │        │    │                 │                    betas: [0.9, 0.999]
+    │    │                │        │    │                 │                    capturable: False
+    │    │                │        │    │                 │                    differentiable: False
+    │    │                │        │    │                 │                    eps:...
+    │    │                │        │    │                 └ tensor(0.)
+    │    │                │        │    └ <property object at 0x7f4f80a03920>
+    │    │                │        └ <pytorch_lightning.accelerators.gpu.GPUAccelerator object at 0x7f4f0c7e0280>
+    │    │                └ <function PrecisionPlugin.backward at 0x7f4f80afc3a0>
+    │    └ <pytorch_lightning.plugins.precision.precision_plugin.PrecisionPlugin object at 0x7f4f0c7e2110>
+    └ <pytorch_lightning.accelerators.gpu.GPUAccelerator object at 0x7f4f0c7e0280>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/precision/precision_plugin.py", line 91, in backward
+    model.backward(closure_loss, optimizer, *args, **kwargs)
+    │     │        │             │           │       └ {}
+    │     │        │             │           └ (0,)
+    │     │        │             └ Adam (
+    │     │        │               Parameter Group 0
+    │     │        │                   amsgrad: False
+    │     │        │                   betas: [0.9, 0.999]
+    │     │        │                   capturable: False
+    │     │        │                   differentiable: False
+    │     │        │                   eps: ...
+    │     │        └ tensor(0.)
+    │     └ <function LightningModule.backward at 0x7f4f3d8f9fc0>
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/lightning.py", line 1446, in backward
+    loss.backward(*args, **kwargs)
+    │    │         │       └ {}
+    │    │         └ ()
+    │    └ <function Tensor.backward at 0x7f50c4981fc0>
+    └ tensor(0.)
+  File "/usr/local/lib/python3.10/dist-packages/torch/_tensor.py", line 522, in backward
+    torch.autograd.backward(
+    │     │        └ <function backward at 0x7f502699d5a0>
+    │     └ <module 'torch.autograd' from '/usr/local/lib/python3.10/dist-packages/torch/autograd/__init__.py'>
+    └ <module 'torch' from '/usr/local/lib/python3.10/dist-packages/torch/__init__.py'>
+  File "/usr/local/lib/python3.10/dist-packages/torch/autograd/__init__.py", line 266, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+    │        │                 └ <method 'run_backward' of 'torch._C._EngineBase' objects>
+    │        └ <torch._C._EngineBase object at 0x7f512a8c0e30>
+    └ <class 'torch.autograd.variable.Variable'>
+
+RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn
+2025-02-26 10:04:07.283 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 10:07:36.563 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 10:07:36.564 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 10:07:39.555 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported
+2025-02-26 10:07:44.697 | ERROR    | silk.cli:main:111 - An error has been caught in function 'main', process 'MainProcess' (169152), thread 'MainThread' (140521648177600):
+Traceback (most recent call last):
+
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+           │         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+           │         └ <code object <module> at 0x7fcdbe1dee40, file "/root/silk/silk/cli/__main__.py", line 1>
+           └ <function _run_code at 0x7fcdbec8ef80>
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+         │     └ {'__name__': '__main__', '__doc__': None, '__package__': 'silk.cli', '__loader__': <_frozen_importlib_external.SourceFileLoad...
+         └ <code object <module> at 0x7fcdbe1dee40, file "/root/silk/silk/cli/__main__.py", line 1>
+
+  File "/root/silk/silk/cli/__main__.py", line 24, in <module>
+    main()
+    └ <function main at 0x7fcdbd8aa440>
+
+  File "/usr/local/lib/python3.10/dist-packages/hydra/main.py", line 94, in decorated_main
+    _run_hydra(
+    └ <function _run_hydra at 0x7fcdbe219d80>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 394, in _run_hydra
+    _run_app(
+    └ <function _run_app at 0x7fcdbe219e10>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 457, in _run_app
+    run_and_report(
+    └ <function run_and_report at 0x7fcdbe219cf0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 220, in run_and_report
+    return func()
+           └ <function _run_app.<locals>.<lambda> at 0x7fcdbd70e9e0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/utils.py", line 458, in <lambda>
+    lambda: hydra.run(
+            │     └ <function Hydra.run at 0x7fcdbe1672e0>
+            └ <hydra._internal.hydra.Hydra object at 0x7fcdbd931930>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/_internal/hydra.py", line 119, in run
+    ret = run_job(
+          └ <function run_job at 0x7fcdbe218ee0>
+  File "/usr/local/lib/python3.10/dist-packages/hydra/core/utils.py", line 186, in run_job
+    ret.return_value = task_function(task_cfg)
+    │   │              │             └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │   │              └ <function main at 0x7fcdbd8aa3b0>
+    │   └ <property object at 0x7fcdbe207ce0>
+    └ JobReturn(overrides=['mode=train-silk'], cfg={'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'pytho...
+
+  File "/root/silk/silk/cli/__main__.py", line 21, in main
+    silk.cli.main(cfg)
+    │    │   │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+    │    │   └ <function main at 0x7fcdbd8a9750>
+    │    └ <module 'silk.cli' from '/root/silk/silk/cli/__init__.py'>
+    └ <module 'silk' from '/root/silk/silk/__init__.py'>
+
+> File "/root/silk/silk/cli/__init__.py", line 111, in main
+    return _main(cfg, working_dir)
+           │     │    └ '.'
+           │     └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           └ <function _main at 0x7fcdbd8a96c0>
+
+  File "/root/silk/silk/cli/__init__.py", line 94, in _main
+    output = _main_dispatch(cfg.mode.command, cfg)
+             │              │                 └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             │              └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+             └ <function _main_dispatch at 0x7fcdbeaf9bd0>
+
+  File "/root/silk/silk/cli/__init__.py", line 69, in _main_dispatch
+    return module.main(cfg) #HERE GO SILK.CLI.TRAINING
+           │      │    └ {'formatter': {'_target_': 'silk.config.formatter.get_formatter', 'name': 'python'}, 'logger': {'handlers': {'stderr-dev': {'...
+           │      └ <function main at 0x7fcdbecba830>
+           └ <module 'silk.cli.training' from '/root/silk/silk/cli/training.py'>
+
+  File "/root/silk/silk/cli/training.py", line 90, in main
+    trainer.fit(model, train_loader, val_loader) #usually this becomes train
+    │       │   │      │             └ <torch.utils.data.dataloader.DataLoader object at 0x7fcdbd56db10>
+    │       │   │      └ <torch.utils.data.dataloader.DataLoader object at 0x7fcb64a25240>
+    │       │   └ SiLKRandomHomographies(
+    │       │       (_module): MixedModuleDict(
+    │       │         (_mods): ModuleDict(
+    │       │           (model): SiLKVGG(
+    │       │             (backbone): Pa...
+    │       └ <function Trainer.fit at 0x7fcb839279a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 737, in fit
+    self._call_and_handle_interrupt(
+    │    └ <function Trainer._call_and_handle_interrupt at 0x7fcb83927880>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 682, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           │           │       └ {}
+           │           └ (SiLKRandomHomographies(
+           │               (_module): MixedModuleDict(
+           │                 (_mods): ModuleDict(
+           │                   (model): SiLKVGG(
+           │                     (backbone): P...
+           └ <bound method Trainer._fit_impl of <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 772, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+    │    │    │                └ None
+    │    │    └ SiLKRandomHomographies(
+    │    │        (_module): MixedModuleDict(
+    │    │          (_mods): ModuleDict(
+    │    │            (model): SiLKVGG(
+    │    │              (backbone): Pa...
+    │    └ <function Trainer._run at 0x7fcb8393c3a0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1195, in _run
+    self._dispatch()
+    │    └ <function Trainer._dispatch at 0x7fcb8393c5e0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1274, in _dispatch
+    self.training_type_plugin.start_training(self)
+    │    │                                   └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+    │    └ <property object at 0x7fcb8392b790>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 202, in start_training
+    self._results = trainer.run_stage()
+    │    │          │       └ <function Trainer.run_stage at 0x7fcb8393c670>
+    │    │          └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+    │    └ None
+    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7fcb6480c6a0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1284, in run_stage
+    return self._run_train()
+           │    └ <function Trainer._run_train at 0x7fcb8393c790>
+           └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1306, in _run_train
+    self._run_sanity_check(self.lightning_module)
+    │    │                 │    └ <property object at 0x7fcb8392bce0>
+    │    │                 └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+    │    └ <function Trainer._run_sanity_check at 0x7fcb8393c940>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/trainer/trainer.py", line 1370, in _run_sanity_check
+    self._evaluation_loop.run()
+    │    └ <property object at 0x7fcb839451c0>
+    └ <pytorch_lightning.trainer.trainer.Trainer object at 0x7fcb6480e710>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ ()
+    │    └ <function EvaluationLoop.advance at 0x7fcb838d4d30>
+    └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7fcb83941990>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 109, in advance
+    dl_outputs = self.epoch_loop.run(dataloader, dataloader_idx, dl_max_batches, self.num_dataloaders)
+                 │    │          │   │           │               │               │    └ <property object at 0x7fcb838b7740>
+                 │    │          │   │           │               │               └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7fcb83941990>
+                 │    │          │   │           │               └ 1
+                 │    │          │   │           └ 0
+                 │    │          │   └ <pytorch_lightning.utilities.fetching.DataFetcher object at 0x7fcb83973580>
+                 │    │          └ <function Loop.run at 0x7fcb83a6ab00>
+                 │    └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7fcb83942920>
+                 └ <pytorch_lightning.loops.dataloader.evaluation_loop.EvaluationLoop object at 0x7fcb83941990>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/base.py", line 145, in run
+    self.advance(*args, **kwargs)
+    │    │        │       └ {}
+    │    │        └ (<pytorch_lightning.utilities.fetching.DataFetcher object at 0x7fcb83973580>, 0, 1, 1)
+    │    └ <function EvaluationEpochLoop.advance at 0x7fcb838c1e10>
+    └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7fcb83942920>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 123, in advance
+    output = self._evaluation_step(batch, batch_idx, dataloader_idx)
+             │    │                │      │          └ 0
+             │    │                │      └ 0
+             │    │                └ NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │    │                            [255, 255, 255,  ...,  32,  30,  29],
+             │    │                      ...
+             │    └ <function EvaluationEpochLoop._evaluation_step at 0x7fcb838c2290>
+             └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7fcb83942920>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 215, in _evaluation_step
+    output = self.trainer.accelerator.validation_step(step_kwargs)
+             │    │                                   └ OrderedDict([('batch', NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │    │                                               [255, 255, 255,  .....
+             │    └ <property object at 0x7fcb83a234c0>
+             └ <pytorch_lightning.loops.epoch.evaluation_epoch_loop.EvaluationEpochLoop object at 0x7fcb83942920>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 236, in validation_step
+    return self.training_type_plugin.validation_step(*step_kwargs.values())
+           │    │                    │                │           └ <method 'values' of 'collections.OrderedDict' objects>
+           │    │                    │                └ OrderedDict([('batch', NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                    │                            [255, 255, 255,  .....
+           │    │                    └ <function DDPPlugin.validation_step at 0x7fcbc6b15b40>
+           │    └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7fcb6480c6a0>
+           └ <pytorch_lightning.accelerators.gpu.GPUAccelerator object at 0x7fcb6480f4c0>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/plugins/training_type/ddp.py", line 444, in validation_step
+    return self.model(*args, **kwargs)
+           │    │      │       └ {}
+           │    │      └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                  [255, 255, 255,  ...,  32,  30,  29],
+           │    │           ...
+           │    └ <property object at 0x7fcbc6b09120>
+           └ <pytorch_lightning.plugins.training_type.ddp.DDPPlugin object at 0x7fcb6480c6a0>
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                       [255, 255, 255,  ...,  32,  30,  29],
+           │    │                ...
+           │    └ <function Module._call_impl at 0x7fcc6cad85e0>
+           └ DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                         [255, 255, 255,  ...,  32,  30,  29],
+           │                  ...
+           └ <bound method DistributedDataParallel.forward of DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/parallel/distributed.py", line 1523, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+         │    │                 │         └ {}
+         │    │                 └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+         │    │                             [255, 255, 255,  ...,  32,  30,  29],
+         │    │                      ...
+         │    └ <function DistributedDataParallel._run_ddp_forward at 0x7fcc6c718280>
+         └ DistributedDataParallel(
+             (module): LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/parallel/distributed.py", line 1359, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+           │            │         └ {}
+           │            └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                        [255, 255, 255,  ...,  32,  30,  29],
+           │                 ...
+           └ DistributedDataParallel(
+               (module): LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): Mixed...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │    │                       [255, 255, 255,  ...,  32,  30,  29],
+           │    │                ...
+           │    └ <function Module._call_impl at 0x7fcc6cad85e0>
+           └ LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_module): MixedModuleDict(
+                   (_mods): ModuleDict(
+               ...
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+           │                         [255, 255, 255,  ...,  32,  30,  29],
+           │                  ...
+           └ <bound method _LightningModuleWrapperBase.forward of LightningDistributedModule(
+               (module): SiLKRandomHomographies(
+                 (_mo...
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/overrides/base.py", line 92, in forward
+    output = self.module.validation_step(*inputs, **kwargs)
+             │                            │         └ {}
+             │                            └ (NamedContext({'image_1': tensor([[[[255, 255, 255,  ...,  35,  34,  34],
+             │                                        [255, 255, 255,  ...,  32,  30,  29],
+             │                                 ...
+             └ LightningDistributedModule(
+                 (module): SiLKRandomHomographies(
+                   (_module): MixedModuleDict(
+                     (_mods): ModuleDict(
+                 ...
+
+  File "/root/silk/silk/models/silk.py", line 508, in validation_step
+    return self._total_loss(
+           │    └ <function SiLKBase._total_loss at 0x7fcb6e3271c0>
+           └ SiLKRandomHomographies(
+               (_module): MixedModuleDict(
+                 (_mods): ModuleDict(
+                   (model): SiLKVGG(
+                     (backbone): Pa...
+
+  File "/root/silk/silk/models/silk.py", line 489, in _total_loss
+    self.log(f"{mode}.total.loss", loss)
+    │    │                         └ None
+    │    └ <function LightningModule.log at 0x7fcb839492d0>
+    └ SiLKRandomHomographies(
+        (_module): MixedModuleDict(
+          (_mods): ModuleDict(
+            (model): SiLKVGG(
+              (backbone): Pa...
+
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/lightning.py", line 409, in log
+    apply_to_collection(
+    └ <function apply_to_collection at 0x7fcc6b438700>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/utilities/apply_func.py", line 92, in apply_to_collection
+    return function(data, *args, **kwargs)
+           │        │      │       └ {}
+           │        │      └ ('val.total.loss', None)
+           │        └ None
+           └ <function LightningModule.__check_allowed at 0x7fcb83949480>
+  File "/usr/local/lib/python3.10/dist-packages/pytorch_lightning/core/lightning.py", line 575, in __check_allowed
+    raise ValueError(f"`self.log({name}, {value})` was called, but `{type(v).__name__}` values cannot be logged")
+
+ValueError: `self.log(val.total.loss, None)` was called, but `NoneType` values cannot be logged
+2025-02-26 10:07:44.749 | ERROR    | silk.cli:main:113 - run failed, `*.log` file might be found in : .
+2025-02-26 10:08:20.461 | INFO     | silk.cli:_main:87 - run CLI in mode.command=training
+2025-02-26 10:08:20.462 | SUCCESS  | silk.cli:_main:91 - formatter `python` successfully instantiated
+2025-02-26 10:08:23.410 | SUCCESS  | silk.cli:_main_dispatch:68 - module `silk.cli.training` successfully imported

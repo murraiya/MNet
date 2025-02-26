@@ -313,7 +313,7 @@ class SiLKBase(
         # )
         self.flow.define_transition(
             # ("acontextual_descriptor_loss", "keypoint_loss", "precision", "recall"),
-            "acontextual_descriptor_loss", 
+            ("acontextual_descriptor_loss", "keypoint_loss"),
             self._loss,
             "sparse_positions", 
             "sparse_descriptors", 
@@ -344,8 +344,8 @@ class SiLKBase(
         # )
         self._loss_fn = self.flow.with_outputs(
             (
-                "acontextual_descriptor_loss" 
-                # "keypoint_loss",                
+                "acontextual_descriptor_loss", 
+                "keypoint_loss"               
                 # "precision",
                 # "recall",
             )
@@ -467,22 +467,30 @@ class SiLKBase(
         # self._loss_fn(
         #     batch, use_image_aug
         # )
-        actx_desc_loss = \
+        actx_desc_loss, keypt_loss = \
         self._loss_fn(
             batch, use_image_aug
         )
         
-        # if math.isnan(actx_desc_loss):
-        #     print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        # if math.isnan(keypt_loss):
-        #     print("keypt loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        
-        loss = actx_desc_loss
+        loss_for_log = actx_desc_loss + keypt_loss
+
+        if math.isnan(actx_desc_loss):
+            # print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            loss = keypt_loss
+            
+            if math.isnan(keypt_loss):
+                # print("keypt loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                loss = None
+        elif math.isnan(actx_desc_loss) == 0:
+            if math.isnan(keypt_loss):
+                loss = actx_desc_loss
+            else:
+                loss = actx_desc_loss + keypt_loss
 
 
-        self.log(f"{mode}.total.loss", loss)
+        self.log(f"{mode}.total.loss", loss_for_log)
         self.log(f"{mode}.acontextual.descriptors.loss", actx_desc_loss)
-        # self.log(f"{mode}.keypoints.loss", keypt_loss)
+        self.log(f"{mode}.keypoints.loss", keypt_loss)
         # self.log(f"{mode}.recon.loss", recon_loss)
         # self.log(f"{mode}.precision", precision)
         # self.log(f"{mode}.recall", recall)
