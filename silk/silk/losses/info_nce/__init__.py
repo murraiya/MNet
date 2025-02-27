@@ -57,12 +57,8 @@ class Loss(torch.nn.Module):
         self,
         sparse_positions,
         sparse_descriptors,
-        desc_0,
-        desc_1,
         corr_0,
         corr_1,
-        logits_0,
-        logits_1,
         ghost_sim=None,
     ):
         self.cnt+=1

@@ -479,11 +479,6 @@ class HomographicSampler:
         # print("in pixel2cam", cam_coords.shape, depth.shape)
         # ([1, 3, 21316]) torch.Size([1, 376, 1241])
         # ([1, 3, 21316]) torch.Size([1, 1200, 1920])
-
-        # print(depth.shape, shape)
-        # torch.Size([1, 376, 1241]) (tensor([3]), tensor([376]), tensor([1241]))
-        # torch.Size([1, 1200, 1920]) (tensor([3]), tensor([1200]), tensor([1920]))
-
         
         #########################################
         ### grid sample depth 
@@ -617,7 +612,7 @@ class HomographicSampler:
         # return non-homogeneous coordinate
         if normalize:
             bf_norm = torch.stack([X/Z, Y/Z], dim=2)
-            print(shape[-2], shape[-1])
+            # print(shape[-2], shape[-1])
             # tensor([370]) tensor([1226])
             X_norm = 2*(X / Z)/(shape[-1]) - 1  # Normalized, -1 if on extreme left, 1 if on extreme right (x = w-1) [B, H*W]
             Y_norm = 2*(Y / Z)/(shape[-2]) - 1  # Idem [B, H*W]

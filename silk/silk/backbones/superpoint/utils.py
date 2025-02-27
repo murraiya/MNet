@@ -126,6 +126,7 @@ def prob_map_to_points_map(
     if prob_thresh != 1.0: 
         print("wrong thresh")
         exit(0)
+
     if top_k:
         # print("top_k")
         if top_k >= prob_map.shape[-1] * prob_map.shape[-2]:
@@ -170,7 +171,6 @@ def prob_map_to_points_map(
     # io.imsave("folder_for_viz/prob_to_map_3.png", prob_map[0].unsqueeze(2).cpu().numpy())
     # changes here
   
-
     return prob_map # batch_output
 
 

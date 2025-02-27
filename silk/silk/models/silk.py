@@ -229,12 +229,19 @@ class SiLKBase(
             self._grayify,
             "augmented_images",
         )
+        # self.flow.define_transition(
+        #     ("descriptors", "logits", "sparse_positions", "sparse_descriptors", "probability"),
+        #     self._model.forward_flow,
+        #     outputs=Flow.Constant(("normalized_descriptors", "logits", "sparse_positions", "sparse_descriptors", "probability")),
+        #     images = "gray_images",
+        # )
         self.flow.define_transition(
-            ("descriptors", "logits", "sparse_positions", "sparse_descriptors", "nms"),
+            ("descriptors", "sparse_positions", "sparse_descriptors", "probability"),
             self._model.forward_flow,
-            outputs=Flow.Constant(("normalized_descriptors", "logits", "sparse_positions", "sparse_descriptors", "nms")),
+            outputs=Flow.Constant(("normalized_descriptors", "sparse_positions", "sparse_descriptors", "probability")),
             images = "gray_images",
         )
+
         self.flow.define_transition(
             "sparse_positions_",
             self.from_feature_coords_to_image_coords,
@@ -255,16 +262,16 @@ class SiLKBase(
             lambda x: x.shape,
             "descriptors",
         )
-        self.flow.define_transition(
-            ("logits_0", "logits_1"),
-            self._split_logits,
-            "logits",
-        )
-        self.flow.define_transition(
-            ("descriptors_0", "descriptors_1"),
-            self._split_descriptors,
-            "descriptors",
-        )
+        # self.flow.define_transition(
+        #     ("logits_0", "logits_1"),
+        #     self._split_logits,
+        #     "logits",
+        # )
+        # self.flow.define_transition(
+        #     ("descriptors_0", "descriptors_1"),
+        #     self._split_descriptors,
+        #     "descriptors",
+        # )
         # self.flow.define_transition(
         #     ("pose_loss", "predicted_pose", "predicted_pose_inv", "matched_sparse_positions_1", "matched_sparse_positions_2", "matches"),
         #     epiploar_loss,
@@ -287,43 +294,36 @@ class SiLKBase(
         self.flow.define_transition(
             ("corr_forward", "corr_backward"),
             corr_fn,
-            "nms",
             "descriptors",
-            "image_shape",
+            image_shape,
             "sparse_positions",
             pose_gt_forward,
             pose_gt_backward,
             intrinsics,
             depth_map_1,
             depth_map_2,
-            image_shape,
             images_input_name,
         )
-        # self.flow.define_transition(
-        #     "recon_loss",
-        #     photometric_reconstruction_loss,
-        #     "gray_images",
-        #     depth_map_1,
-        #     depth_map_2,
-        #     intrinsics,
-        #     pose_gt_forward, 
-        #     pose_gt_backward,
-        #     "nms", 
-        #     "descriptors",
-        # )
         self.flow.define_transition(
             # ("acontextual_descriptor_loss", "keypoint_loss", "precision", "recall"),
             ("acontextual_descriptor_loss", "keypoint_loss"),
             self._loss,
             "sparse_positions", 
             "sparse_descriptors", 
-            "descriptors_0",
-            "descriptors_1",
             "corr_forward", 
             "corr_backward",
-            "logits_0",
-            "logits_1",
             Flow.Constant(self._ghost_sim),
+        )
+        self.flow.define_transition(
+            "recon_loss",
+            photometric_reconstruction_loss,
+            "gray_images",
+            depth_map_1,
+            depth_map_2,
+            intrinsics,
+            pose_gt_forward, 
+            pose_gt_backward,
+            "probability", 
         )
         # self.flow.define_transition(
         #     ("contextual_descriptor_0", "contextual_descriptor_1"),
@@ -344,6 +344,7 @@ class SiLKBase(
         # )
         self._loss_fn = self.flow.with_outputs(
             (
+                "recon_loss",
                 "acontextual_descriptor_loss", 
                 "keypoint_loss"               
                 # "precision",
@@ -467,12 +468,21 @@ class SiLKBase(
         # self._loss_fn(
         #     batch, use_image_aug
         # )
-        actx_desc_loss, keypt_loss = \
+        recon_loss, actx_desc_loss, keypt_loss = \
         self._loss_fn(
             batch, use_image_aug
         )
         
-        loss_for_log = actx_desc_loss + keypt_loss
+        loss_for_log = recon_loss + actx_desc_loss + keypt_loss
+        
+        self.log(f"{mode}.total.loss", loss_for_log)
+        self.log(f"{mode}.acontextual.descriptors.loss", actx_desc_loss)
+        self.log(f"{mode}.keypoints.loss", keypt_loss)
+        self.log(f"{mode}.recon.loss", recon_loss)
+        # self.log(f"{mode}.precision", precision)
+        # self.log(f"{mode}.recall", recall)
+        if (self._ghost_sim is not None) and (mode == "train"):
+            self.log("ghost.sim", self._ghost_sim)
 
         if math.isnan(actx_desc_loss):
             # print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -487,15 +497,9 @@ class SiLKBase(
             else:
                 loss = actx_desc_loss + keypt_loss
 
+        if loss == None: loss = recon_loss
+        else: loss += recon_loss
 
-        self.log(f"{mode}.total.loss", loss_for_log)
-        self.log(f"{mode}.acontextual.descriptors.loss", actx_desc_loss)
-        self.log(f"{mode}.keypoints.loss", keypt_loss)
-        # self.log(f"{mode}.recon.loss", recon_loss)
-        # self.log(f"{mode}.precision", precision)
-        # self.log(f"{mode}.recall", recall)
-        if (self._ghost_sim is not None) and (mode == "train"):
-            self.log("ghost.sim", self._ghost_sim)
 
         return loss
 
@@ -607,7 +611,7 @@ class SiLKRandomHomographies(SiLKBase):
 
 
     # the 241015 version
-    def _get_corr(self, nms, descriptors, image_shape, sparse_positions, pose_gt_forward, pose_gt_backward, intrinsics, depth_map_1, depth_map_2, sh, img):
+    def _get_corr(self, descriptors, image_shape, sparse_positions, pose_gt_forward, pose_gt_backward, intrinsics, depth_map_1, depth_map_2, img):
         sampler = HomographicSampler(
             image_shape[0],     # batch_size 1 
             # shape[-2:],   # 3, 164, 164 ??
@@ -708,7 +712,7 @@ class SiLKRandomHomographies(SiLKBase):
             # image_shape=image_shape[-2:],
             ordering="xy",
             # shape=(descriptors_height,descriptors_width),    
-            imshape = sh,
+            imshape = image_shape,
         )
         # warped mask is in image2 coordinate, value 0 where no point should be extracte
         # print(warped_positions_backward.shape) torch.Size([1, 425216, 2])
@@ -724,7 +728,7 @@ class SiLKRandomHomographies(SiLKBase):
             # image_shape=image_shape[-2:],
             ordering="xy",
             # shape=(descriptors_height,descriptors_width),
-            imshape = sh,
+            imshape = image_shape,
         )
         # img_pair_visual(
         #     image1=img[0],

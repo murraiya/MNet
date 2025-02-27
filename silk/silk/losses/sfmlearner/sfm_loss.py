@@ -128,40 +128,17 @@ def patch_positions(img, kpts, patch_size:int = 8):
     return toreturn.reshape(1, kpts.shape[0], -1, 2)
 
 
-def photometric_reconstruction_loss(whole_images, depth_map_0, depth_map_1, intrinsics, pose_gt_forward, pose_gt_backward, logits, descriptors, coord_mapping=None):
-    # a = torch.matmul(rel_pose[0], torch.linalg.inv(pose))
-    # dont = (a - torch.eye(4)).sum()
-    # pose = pose.to(intrinsics.device)
-    # rel_pose = rel_pose.to(intrinsics.device)
-    # print(logits.shape)
-    # print(descs.shape)
-    # print(whole_images.shape)
-    # torch.Size([2, 1, 370, 1226])
-    # torch.Size([2, 128, 370, 1226])
-    # torch.Size([2, 3, 370, 1226])
-    descriptors_height = descriptors.shape[2]
-    descriptors_width = descriptors.shape[3]
-    print(descriptors_height, descriptors_width)
-    print(logits.shape)
+def photometric_reconstruction_loss(whole_images, depth_map_0, depth_map_1, intrinsics, pose_gt_forward, pose_gt_backward, logits, coord_mapping=None):
     
-
-
     # io.imsave("./folder_for_viz/whole_image_1.png", whole_images[0].squeeze(0).permute(1,2,0).detach().cpu().numpy())
     # io.imsave("./folder_for_viz/whole_image_2.png", whole_images[1].squeeze(0).permute(1,2,0).detach().cpu().numpy())
     
     # im_1, im_2: 0~255 with 3 channel    
     recon_loss = 0
     des_loss = 0
-    shape = whole_images[0].shape
+    shape = whole_images.shape
     im_0, im_1 = whole_images[0].unsqueeze(0), whole_images[1].unsqueeze(0)
-    # print(depthpro.shape)
-    # print(min(depthpro[0].reshape(-1)), max(depthpro[0].reshape(-1)))
-    # print(min(depthpro[1].reshape(-1)), max(depthpro[1].reshape(-1)))
-
-    # io.imsave("./folder_for_viz/depth.png", depthpro[0].squeeze(0).detach().cpu().numpy())
-
-    # depth_map_0, depth_map_1 = depthpro[0].squeeze(0), depthpro[1].squeeze(0)
-
+    
     if len(depth_map_1.shape) == 2:
         depth_map_0, depth_map_1 = depth_map_0.unsqueeze(0), depth_map_1.unsqueeze(0)
     
@@ -172,244 +149,46 @@ def photometric_reconstruction_loss(whole_images, depth_map_0, depth_map_1, intr
         normalized=False,
     )
     positions = HomographicSampler._convert_points_to_homogeneous(positions.reshape(1, -1, 2)).permute(0,2,1)
-    print(positions.shape)
-    # p = SiLKBase.from_feature_coords_to_image_coords(positions)
-    # print(p.shape)
-
+    
     im_0 = im_0.to(torch.float32)
     im_1 = im_1.to(torch.float32)
-    
+        
+    # print(logits.shape, positions.shape)
+    # torch.Size([2, 1, 352, 1208]) torch.Size([1, 3, 453620])
+
     # pose 1->2 
-    # reconstruction_loss, desc_loss = compute_diff(intrinsics, rel_pose[1], logits[1], logits[0], descs[1], descs[0], im_1.clone(), im_0.clone(), depth_map_0, positions.clone(), shape)
-    reconstruction_loss, desc_loss = compute_diff(intrinsics, pose_gt_backward, logits[1], logits[0], im_1.clone(), im_0.clone(), depth_map_0, positions.clone(), shape)
-    recon_loss += reconstruction_loss
-    des_loss += desc_loss
+    recon_loss += compute_diff(intrinsics, pose_gt_backward, logits[0], im_1.clone(), im_0.clone(), depth_map_0, positions.clone(), shape)
+    recon_loss += compute_diff(intrinsics, pose_gt_forward, logits[1], im_0.clone(), im_1.clone(), depth_map_1, positions.clone(), shape)
     
-    # reconstruction_loss, desc_loss = compute_diff(intrinsics, rel_pose[0], logits[0], logits[1], descs[0], descs[1], im_0.clone(), im_1.clone(), depth_map_1, positions.clone(), shape)
-    # reconstruction_loss, desc_loss = compute_diff(intrinsics, pose_gt_forward, logits[0], logits[1], descs[0], descs[1], im_0.clone(), im_1.clone(), depth_map_1, positions.clone(), shape)
-    recon_loss += reconstruction_loss
-    des_loss += desc_loss
-    
-    return recon_loss, des_loss
-    
-    
-# def compute_diff(intrinsics, pose_inv, kpts_2, image_1, image_2, depth_map_2, positions):
+    return recon_loss
 
 
-# in other gpu 
-# def compute_diff(intrinsics, pose_inv, logits_0, logits_1, descs_0, descs_1, image_0, image_1, depth_map_1, positions, shape):
-def compute_diff(intrinsics, pose_inv, logits_0, logits_1, image_0, image_1, depth_map_1, positions, shape):
 
+def compute_diff(intrinsics, pose_inv, logits_1, image_0, image_1, depth_map_1, positions, shape):
 
     image_0_warped, valid_points_1, bf_norm = inverse_warp(image_0, depth_map_1, pose_inv,
                                                 intrinsics, positions.clone(), shape)
-    # io.imsave("./folder_for_viz/warped_im.png", (255*image_0_warped[0]).permute(1,2,0).detach().cpu().numpy())
-
-    # print(bf_norm.shape) 
-    # print(min(bf_norm.reshape(-1)), max(bf_norm.reshape(-1)))
-    
-    # torch.Size([1, 370, 1226, 2])
-    # tensor(0.5000, device='cuda:1', dtype=torch.float64) tensor(1364.3639, device='cuda:1', dtype=torch.float64)
-    # print(image_0_warped.shape, image_1.shape)
-    # torch.Size([1, 1, 370, 1226]) torch.Size([1, 1, 370, 1226])
-    # print(max(image_0_warped.reshape(-1)), max(image_1.reshape(-1)))
-    # tensor(765.0001, device='cuda:1') tensor(765., device='cuda:1')
-
+    # io.imsave("folder_for_viz/im_0_warped.png", (255*image_0_warped[0]).permute(1,2,0).detach().cpu().numpy())
+    # io.imsave("folder_for_viz/im_0.png", (255*image_0[0]).permute(1,2,0).detach().cpu().numpy())
    
-    diff = image_1*valid_points_1 - image_0_warped
-    sh = diff.shape
+    # print(image_1.shape, image_0_warped.shape)
+    # print(max(image_1.reshape(-1)), max(image_0_warped.reshape(-1)))
+    # print(min(image_1.reshape(-1)), min(image_0_warped.reshape(-1)))
     
-    # print(sh)
-    # 1,1,370,1226
-    scale = sh[-1]*sh[-2]
-    diff_softmax = scale * torch.softmax(diff.reshape(-1), dim=0).reshape(sh)
-    # io.imsave("./folder_for_viz/diff_softmax.png", diff_softmax[0].permute(1,2,0).detach().cpu().numpy())
-    # [0.37892431020736694, 2.573427200317383]
-    
-    # io.imsave("./folder_for_viz/diff_softmax.png", (255*diff_softmax[0]).permute(1,2,0).detach().cpu().numpy())
-    # # [96.62580108642578, 656.2235717773438]
-    
-
-    # print(diff.shape, max(diff.reshape(-1)))
-    # torch.Size([1, 370, 1226]) tensor(734.9904, device='cuda:1')
-    
-    # den, max_indices = torch.max(torch.cat([image_1, image_0_warped], dim=0), dim=0)
-    # print(den.shape, max(den.reshape(-1)))
-    
-    # den = image_1.detach().clone()
-    # den = torch.where(den>0.03, den, 1)
-    # min cannot do this. if 0 is min, nan occurs
-   
-   
-    # print(den.shape)
-    # torch.Size([370, 1226])
-
-    # io.imsave("./folder_for_viz/diff.png", (255*diff[0]).permute(1,2,0).detach().cpu().numpy())
-    # normalized_diff = abs(torch.div(diff[0], den[0])).unsqueeze(0)
-
-    # io.imsave("./folder_for_viz/normalized_diff.png", (255*normalized_diff[0]).permute(1,2,0).detach().cpu().numpy())
-
-    # print(normalized_diff.shape)
+    diff = abs(image_1*valid_points_1 - image_0_warped)
+    # print(diff.shape)
     # torch.Size([1, 1, 370, 1226])
-    # print(min(normalized_diff.reshape(-1)), max(normalized_diff.reshape(-1)))
-    # tensor(0., device='cuda:1') tensor(28.5291, device='cuda:1')
+    # print(logits_1.shape)
+    # torch.Size([1, 352, 1208])
+    # print(diff[0, :, 9:-9, 9:-9].shape)
+    # torch.Size([1, 352, 1208])
 
-    # how can it be 0, 1 ..?????????
-    # it happens
-    # print(normalized_diff.mean(), logits_1.mean())
-    # tensor(0.4825, device='cuda:1') tensor(0.7624, device='cuda:1')
-
-    # io.imsave("./folder_for_viz/photo_loss.png", (255*normalized_diff*logits_1)[0].permute(1,2,0).detach().cpu().numpy())
-
-    # print("-----------------------photo_loss------------------------")
-    # print(photo_loss)
-    # tensor(0.1391, device='cuda:1', grad_fn=<MeanBackward0>)
-
-
-    # normalized_diff = normalized_diff.clone()
-    #-------------------------------------------------------------
-    kernel = 8
-    pool = torch.nn.AvgPool2d(kernel, stride=1, count_include_pad=False)
-    score = pool(diff_softmax)
-    # normalized diff is usually 0~1
-    # print(min(score.reshape(-1)), max(score.reshape(-1)))
-    # tensor(9.3497e-09, device='cuda:1') tensor(0.8500, device='cuda:1')
-
-
-
-    # plt.figure(figsize=(20,5))
-
-
-    # bins = torch.linspace(-1,1,20)
-    # hist = torch.histogram(diff_softmax.detach().cpu(), bins = bins)
-
-    # plt.plot(hist.bin_edges[:-1], hist.hist, color=np.random.rand(3,))    
-    # plt.savefig("./folder_for_viz/softmax_hist.png")
-
-    # print(score.shape)
-    # torch.Size([1, 345, 1210])
-        
-    # print(descs_1.shape, logits_1.shape)
-    # torch.Size([128, 370, 1226]) torch.Size([1, 370, 1226])
-
-    
-    dummy_score = torch.full(descs_1[0].shape, fill_value=1, device=descs_1.device, dtype=torch.float32).unsqueeze(0)
-    # print("dummyscore shape:", dummy_score.shape)
-    # torch.Size([1, 370, 1226])
-    dummy_score[:,kernel//2:-(kernel//2-1),kernel//2:-(kernel//2-1)] = score
-    
-    # print(min(score.reshape(-1)))
-    # print(min(diff_softmax.reshape(-1)))
-    # # tensor(1.3644e-06, device='cuda:1')
-    # # tensor(8.3533e-07, device='cuda:1')
+    photo_loss = logits_1 * diff[0, :, 9:-9, 9:-9]
+    # io.imsave("folder_for_viz/diff.png", (255*diff[0]).permute(1,2,0).detach().cpu().numpy())
+    # io.imsave("folder_for_viz/diff_weighted.png", (255*photo_loss).permute(1,2,0).detach().cpu().numpy())
     
 
-    plt.figure(figsize=(20,5))
-
-
-    bins = torch.linspace(-1,1,20)
-    hist = torch.histogram(dummy_score.reshape(-1).detach().cpu(), bins = bins)
-
-    plt.plot(hist.bin_edges[:-1], hist.hist, color=np.random.rand(3,))    
-    # plt.savefig("./folder_for_viz/softmax_pooled_8_hist.png")
-    # is this right?
-    # io.imsave("./folder_for_viz/softmax_pooled_8.png", (255*dummy_score[0]).detach().cpu().numpy())
-    # [0.0003479103615973145, 255.0].
-    # range[157.8199462890625, 423.5945129394531]
-
-    # exit(0)
-    photo_loss = abs(dummy_score*logits_1).mean()
-
-
-    # avg = score.reshape(-1).mean()
-    # print(avg)
-    # tensor(0.1947, device='cuda:1')
-
-
-    ## i prefer small difference (dummy score) 
-    descs_1 = torch.where(dummy_score<0.73, descs_1, 0)
-    # a = torch.nonzero(dummy_score>avg)
-    # print(descs_1[a[1]]) confirmed. it is all 0
-    
-    # should check if this cuts gradient 
-    # warn !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
-    # print(a.shape)
-    # torch.Size([128, 370, 1226])
-    # a = a.sum(dim=0)
-    # print(a.shape)
-    # torch.Size([370, 1226])
-    # print(torch.count_nonzero(a))
-    # tensor(172107, device='cuda:1')
-    # ------------------------------------------------ til here, handled only 1
-    
-    # take corresponding desc_0 using bf_norm 
-    # bf norm is coordinate of image_0 corresponding to every coord in image_1
-    # torch.Size([1, 370, 1226, 2])
-    
-    # print(max(bf_norm.reshape(-1,2)[:,0]), max(bf_norm.reshape(-1,2)[:,1]))
-    # tensor(1364.3596, device='cuda:1', dtype=torch.float64) tensor(369.5000, device='cuda:1', dtype=torch.float64)
-
-    mask = positions_to_unidirectional_correspondence(
-        bf_norm.reshape(1,-1,2), 
-        width=logits_0.shape[2], 
-        height=logits_0.shape[1], 
-        cell_size = 1.0,
-        ordering="xy"
-    )
-
-    # descs_0 = descs_0.reshape(descs_0.shape[0], -1)
-    # # print(descs_0.shape, mask.shape)
-    # # torch.Size([128, 453620]) torch.Size([1, 453620])
-    # descs_0 = torch.where(mask>-1, descs_0[mask], 0)
-    # # cuda oom 
-
-    mask_ = mask.repeat(descs_0.shape[0], 1).transpose(1,0)
-    # print(mask.shape)
-    descs_0 = descs_0.reshape(descs_0.shape[0], -1).transpose(1,0)
-    
-    # print(descs_0.shape, mask.shape)
-    # torch.Size([453620, 128]) torch.Size([1, 453620])
-
-    
-    descs_0 = torch.where(mask_>-1, descs_0[mask], 0)
-    # print(descs_0.shape)
-    # torch.Size([1, 453620, 128])
-
-    # print(_desc_1.shape)
-    # torch.Size([43780, 128])
-    
-    
-    # print(descs_0.shape, descs_1.shape)
-    # torch.Size([453620, 128]) torch.Size([128, 370, 1226])
-
-    descs_1 = descs_1.reshape(descs_1.shape[0], -1).transpose(1,0)
-    # aligned dot product
-    # log_num = torch.bmm(descs_0.squeeze(0).unsqueeze(1), descs_1.unsqueeze(2)).reshape(-1,1)
-    # print(log_num.shape)
-    # torch.Size([453620, 1])
-    # print(descs_0.shape, descs_1.shape)
-    # torch.Size([1, 453620, 128]) torch.Size([453620, 128])
-    cos_sim = F.cosine_similarity(descs_0[0], descs_1)
-    # print(cos_sim.shape)
-    # torch.Size([453620])
-    # print(max(cos_sim), min(cos_sim))
-    # tensor(1.0000, device='cuda:1') tensor(0., device='cuda:1')
-
-    ones_var = torch.ones_like(cos_sim)
-    cos_dist = ones_var - cos_sim
-    cos_dist = cos_dist.mean()    
-
-    # io.imsave("./folder_for_viz/pooled_32.png", a.squeeze(0).permute(1,2,0).detach().cpu().numpy())
-
-    # io.imsave("./folder_for_viz/mask.png", mask.unsqueeze(2).cpu().numpy())
-    # io.imsave("./folder_for_viz/valid.png", valid_points.permute(1,2,0).cpu().numpy())
-    
-    # io.imsave("./folder_for_viz/corres_im_2.png", image_2_corresponding.squeeze(0).permute(1,2,0).detach().cpu().numpy())
-    # io.imsave("./folder_for_viz/corres_im_1.png", image_1_corresponding.squeeze(0).permute(1,2,0).detach().cpu().numpy())
-    
-    # print(type(photo_loss))
-    return photo_loss, cos_dist
+    return photo_loss.mean()
 
 
 
@@ -441,18 +220,21 @@ def inverse_warp(img, depth, pose_mat, intrinsics, positions, shape, padding_mod
         projected_img: Source image warped to the target image plane
         valid_points: Boolean array indicating point validity
     # """
-    print("=========")
-    print(depth.shape)
+    # print("=========")
+    # print(depth.shape)
+    # torch.Size([1, 370, 1226])
     # torch.Size([1, 370, 1226])
     # io.imsave("./folder_for_viz/depth.png", depth.squeeze(0).cpu().numpy())
     # ValueError: Image must be 2D (grayscale, RGB, or RGBA).
     
-    print(positions.shape)
+    # print(positions.shape)
     # =========
+    # torch.Size([1, 3, 453620])
     # torch.Size([1, 3, 453620])
     # print(max(positions[0,0,:]))
     # print(max(positions[0,1,:]))
     # print(max(positions[0,2,:]))
+
     cam_coords = HomographicSampler.pixel2cam(depth, intrinsics.inverse(), positions, shape)  # [B,3,H,W]
     # print(max(cam_coords[0,0,:]))
     # print(max(cam_coords[0,1,:]))
@@ -461,12 +243,12 @@ def inverse_warp(img, depth, pose_mat, intrinsics, positions, shape, padding_mod
     # tensor(0.0391, device='cuda:1')
     # tensor(1., device='cuda:1')
 
-    print(cam_coords.shape)
+    # print(cam_coords.shape)
     # torch.Size([1, 3, 53248])
     # torch.Size([1, 3, 453620])
     
     pose_mat = pose_mat[:3,:4].unsqueeze(0).double()
-    print(shape)
+    # print(shape)
     # (tensor([3]), tensor([370]), tensor([1226]))
 
     src_pixel_coords, bf_norm  = HomographicSampler.cam2pixel_forward(cam_coords.double(), pose_mat, intrinsics.double(), normalize=True, shape = shape)
@@ -495,7 +277,7 @@ def inverse_warp(img, depth, pose_mat, intrinsics, positions, shape, padding_mod
     # torch.Size([1, 370, 1226, 2])
 
     projected_img = F.grid_sample(img, src_pixel_coords, padding_mode=padding_mode, align_corners=False)
-    print(projected_img.shape)
+    # print(projected_img.shape)
     # torch.Size([1, 3, 370, 1226])
 
     # io.imsave("./folder_for_viz/img.png", img.squeeze(0).permute(1,2,0).detach().cpu().numpy())
