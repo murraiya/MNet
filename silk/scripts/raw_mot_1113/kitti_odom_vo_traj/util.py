@@ -80,9 +80,19 @@ from silk.models.silk import matcher
 # CHECKPOINT_PATH = os.path.join(
 #     os.path.dirname(__file__), "../../../lightning_logs/version_0/checkpoints/epoch=345-step=345999.ckpt"
 # )
+# CHECKPOINT_PATH = os.path.join(
+#     os.path.dirname(__file__), "../../../lightning_logs/1113_raw_mot/checkpoints/epoch=94-step=79419.ckpt"
+# )
+
 CHECKPOINT_PATH = os.path.join(
-    os.path.dirname(__file__), "../../../lightning_logs/1113_raw_mot/checkpoints/epoch=94-step=79419.ckpt"
+    os.path.dirname(__file__), "../../../lightning_logs/sparse_prev_loss/checkpoints/epoch=9-step=8359.ckpt"
 )
+
+
+
+
+
+
 
 DEVICE = "cuda:1"
 

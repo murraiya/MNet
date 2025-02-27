@@ -328,73 +328,73 @@ def total_loss(
     # print(desc_0.shape, desc_1.shape)
     # torch.Size([7001, 128]) torch.Size([7001, 128])
 
-    x0x1 = desc_0 @ desc_1.T
+    # x0x1 = desc_0 @ desc_1.T
 
-    lse_0 = torch.logsumexp(x0x1, axis=1) #soft version of max
-    lse_1 = torch.logsumexp(x0x1, axis=0)
-    argmax_0 = torch.argmax(x0x1, axis=1)
-    argmax_1 = torch.argmax(x0x1, axis=0)
-    max_0 = torch.max(x0x1, axis=1)[0]
-    max_1 = torch.max(x0x1, axis=0)[0]
+    # lse_0 = torch.logsumexp(x0x1, axis=1) #soft version of max
+    # lse_1 = torch.logsumexp(x0x1, axis=0)
+    # argmax_0 = torch.argmax(x0x1, axis=1)
+    # argmax_1 = torch.argmax(x0x1, axis=0)
+    # max_0 = torch.max(x0x1, axis=1)[0]
+    # max_1 = torch.max(x0x1, axis=0)[0]
 
 
 
     # ############################################
-    # if block_size is None:  # reduction on full similarity matrix
-    #     x0x1 = desc_0 @ desc_1.T
+    if block_size is None:  # reduction on full similarity matrix
+        x0x1 = desc_0 @ desc_1.T
 
-    #     lse_0 = torch.logsumexp(x0x1, axis=1)
-    #     lse_1 = torch.logsumexp(x0x1, axis=0)
-    #     argmax_0 = torch.argmax(x0x1, axis=1)
-    #     argmax_1 = torch.argmax(x0x1, axis=0)
-    #     max_0 = torch.max(x0x1, axis=1)[0]
-    #     max_1 = torch.max(x0x1, axis=0)[0]
+        lse_0 = torch.logsumexp(x0x1, axis=1)
+        lse_1 = torch.logsumexp(x0x1, axis=0)
+        argmax_0 = torch.argmax(x0x1, axis=1)
+        argmax_1 = torch.argmax(x0x1, axis=0)
+        max_0 = torch.max(x0x1, axis=1)[0]
+        max_1 = torch.max(x0x1, axis=0)[0]
 
-    # else:  # reduction by scanning blocks of similarity matrix
-    #     def reducer(x0, x1, device="cuda:0"):
-    #         # print(x0.shape, x1.shape)
-    #         # torch.Size([5400, 128]) torch.Size([425216, 128])
+    else:  # reduction by scanning blocks of similarity matrix
+        def reducer(x0, x1, device="cuda:0"):
+            # print(x0.shape, x1.shape)
+            # torch.Size([5400, 128]) torch.Size([425216, 128])
 
-    #         x0x1 = x0 @ x1.T
-    #         # print(x0x1.shape)      
-    #         # torch.Size([5400, 425216])
+            x0x1 = x0 @ x1.T
+            # print(x0x1.shape)      
+            # torch.Size([5400, 425216])
 
-    #         output = torch.stack([
-    #             torch.logsumexp(x0x1, axis=1), 
-    #             torch.argmax(x0x1, axis=1), 
-    #             torch.max(x0x1, axis=1)[0]]  #take only values, not indices
-    #         , dim=0)
-    #         # with torch.cuda.device("cuda:0"):
-    #         #     print(torch.cuda.memory_allocated())
-    #         # with torch.cuda.device("cuda:1"):
-    #         #     print(torch.cuda.memory_allocated())
-    #         # 23645639680
-    #         # 5611986944
+            output = torch.stack([
+                torch.logsumexp(x0x1, axis=1), 
+                torch.argmax(x0x1, axis=1), 
+                torch.max(x0x1, axis=1)[0]]  #take only values, not indices
+            , dim=0)
+            # with torch.cuda.device("cuda:0"):
+            #     print(torch.cuda.memory_allocated())
+            # with torch.cuda.device("cuda:1"):
+            #     print(torch.cuda.memory_allocated())
+            # 23645639680
+            # 5611986944
 
-    #         del x0x1
-    #         # torch.cuda.empty_cache()
-    #         # with torch.cuda.device("cuda:0"):
-    #         #     print(torch.cuda.memory_allocated())
-    #         # with torch.cuda.device("cuda:1"):
-    #         #     print(torch.cuda.memory_allocated())
-    #         # 18916496896
-    #         # 5612051968
+            del x0x1
+            # torch.cuda.empty_cache()
+            # with torch.cuda.device("cuda:0"):
+            #     print(torch.cuda.memory_allocated())
+            # with torch.cuda.device("cuda:1"):
+            #     print(torch.cuda.memory_allocated())
+            # 18916496896
+            # 5612051968
 
-    #         return output.to(device)
+            return output.to(device)
 
-    #     lse_0, argmax_0, max_0 = _scan_reduce(
-    #         desc_0,
-    #         desc_1,
-    #         reducer,
-    #         block_size,
-    #     )
+        lse_0, argmax_0, max_0 = _scan_reduce(
+            desc_0,
+            desc_1,
+            reducer,
+            block_size,
+        )
         
-    #     lse_1, argmax_1, max_1 = _scan_reduce(
-    #         desc_1,
-    #         desc_0,
-    #         reducer,
-    #         block_size,
-    #     )
+        lse_1, argmax_1, max_1 = _scan_reduce(
+            desc_1,
+            desc_0,
+            reducer,
+            block_size,
+        )
     #     # print(lse_1.shape, argmax_1.shape, max_1.shape)     
     #     # torch.Size([43780]) torch.Size([43780]) torch.Size([43780])
     #     # print(lse_1.dtype, argmax_1.dtype, max_1.dtype)     

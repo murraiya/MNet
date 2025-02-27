@@ -129,7 +129,7 @@ def main(seq):
         cv2.imwrite('map.png'.format(seq), traj)
 
 
-    cv2.imwrite('folder_for_viz/mot_{:02}.png'.format(seq), traj)
+    cv2.imwrite('folder_for_viz/sparse_prev_loss_9/mot_{:02}.png'.format(seq), traj)
 
     # np.savetxt('/data/silkimpl/SiLKimpl_pose_2/ISAP_mot_{:02}.txt'.format(seq), pred_array[:-1])
     # np.savetxt('/data/silkimpl/SiLKimpl_pose_2/posehead_mot_{:02}.txt'.format(seq), posehead_array[:-1])
