@@ -153,7 +153,7 @@ def prob_map_to_points_map(
 
     # print(prob_map.shape)
     # torch.Size([2, 357, 1224])
-    # io.imsave("folder_for_viz/prob_to_map_2.png", prob_map[0].unsqueeze(2).cpu().numpy())
+    io.imsave("folder_for_viz/sparse_recon_loss_2_prob.png", prob_map[0].unsqueeze(2).cpu().numpy())
     # prob map is still sigmoid(logit) here. 
 
     # print("0 ", prob_map.requires_grad)
@@ -168,9 +168,9 @@ def prob_map_to_points_map(
     # print(prob_map.shape)
     # torch.Size([2, 357, 1224])
 
-    # io.imsave("folder_for_viz/prob_to_map_3.png", prob_map[0].unsqueeze(2).cpu().numpy())
+    io.imsave("folder_for_viz/sparse_recon_loss_2_prob_.png", prob_map[0].unsqueeze(2).cpu().numpy())
     # changes here
-  
+    exit(0)
     return prob_map # batch_output
 
 

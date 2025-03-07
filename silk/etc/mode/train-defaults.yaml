@@ -2,7 +2,10 @@ defaults:
   - defaults
 
 command: "training"
-continue_from_checkpoint: null
+# continue_from_checkpoint: null
+continue_from_checkpoint: /root/silk/lightning_logs/sparse_recon_loss_2/checkpoints/epoch=18-step=15883.ckpt
+# continue_from_checkpoint: /root/silk/lightning_logs/sparse_recon_loss_1/checkpoints/epoch=99-step=83599.ckpt
+# continue_from_checkpoint: /root/silk/lightning_logs/sparse_recon_loss/checkpoints/epoch=9-step=8359.ckpt
 # continue_from_checkpoint: /root/silk/lightning_logs/sparse_prev_loss/checkpoints/epoch=9-step=8359.ckpt
 # continue_from_checkpoint: /root/silk/lightning_logs/silkimpl_pose_5_C_3/checkpoints/epoch=89-step=89999.ckpt
 # continue_from_checkpoint: /root/silk/lightning_logs/sfm_depth_corr_v4_silkonly/checkpoints/epoch=3-step=3999.ckpt

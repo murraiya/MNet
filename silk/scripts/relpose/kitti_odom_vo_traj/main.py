@@ -65,14 +65,19 @@ def main(seq):
         # print(Rt_cam2_gt) #4,4
         # gt_pose = sample['rel_pose'][1] # np.ndarray 4x4
         abs_gt = sample['abs_pose'] # [0], [1] np.ndarray 4x4 transformation mat
-        R_, t_, R_sift, t_sift = vo.update(image, abs_gt, gt_pose, intrinsic)
+        R_, t_, R_sift, t_sift, rel_R, rel_t = vo.update(image, abs_gt, gt_pose, intrinsic)
         if j==0:
             silk_sjsj = np.concatenate([R_, t_], axis=1)
+            silk_rel_sjsj = np.concatenate([rel_R, rel_t], axis=1)
             sift_T = np.concatenate([R_sift, t_sift], axis=1)
         else:
             silk_sjsj = np.concatenate([R_, t_], axis=1)
+            silk_rel_sjsj = np.concatenate([rel_R, rel_t], axis=1)
             sift_T = np.concatenate([R_sift, t_sift], axis=1)
             
+        gt_rel_array[j] = gt_pose[:3,:4].reshape(-1)
+        pred_rel_array[j] = silk_rel_sjsj.reshape(-1)
+        
 
         pred_last_t = pred_last_t + pred_last_R @ silk_sjsj[:3,3]
         pred_last_R = pred_last_R @ (silk_sjsj[:3,:3])
@@ -107,13 +112,15 @@ def main(seq):
         cv2.imwrite('map.png'.format(seq), traj)
 
 
-    cv2.imwrite('lightning_logs/sparse_recon_loss_1/traj/99_mot_{:02}.png'.format(seq), traj)
+    cv2.imwrite('lightning_logs/sparse_recon_loss_2/traj/18_mot_{:02}.png'.format(seq), traj)
 
-    np.savetxt('lightning_logs/sparse_recon_loss_1/traj/99_pred_{:02}.txt'.format(seq), pred_array[:-1])
-    np.savetxt('lightning_logs/sparse_recon_loss_1/traj/99_gt_{:02}.txt'.format(seq), gt_array[:-1])
+    np.savetxt('lightning_logs/sparse_recon_loss_2/traj/18_pred_{:02}.txt'.format(seq), pred_array[:-1])
+    np.savetxt('lightning_logs/sparse_recon_loss_2/traj/18_gt_{:02}.txt'.format(seq), gt_array[:-1])
+    np.savetxt('lightning_logs/sparse_recon_loss_2/traj/18_pred_rel_{:02}.txt'.format(seq), pred_rel_array[:-1])
+    np.savetxt('lightning_logs/sparse_recon_loss_2/traj/18_gt_rel_{:02}.txt'.format(seq), gt_rel_array[:-1])
 
 
-test_seqs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]       
+test_seqs = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 26, 27, 28]       
 
 if __name__ == '__main__':
     fps=20

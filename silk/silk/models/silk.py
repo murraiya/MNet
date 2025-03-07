@@ -473,35 +473,44 @@ class SiLKBase(
             batch, use_image_aug
         )
         
-        loss_for_log = recon_loss + actx_desc_loss + keypt_loss
+        loss_for_log = recon_loss + actx_desc_loss
         
         self.log(f"{mode}.total.loss", loss_for_log)
         self.log(f"{mode}.acontextual.descriptors.loss", actx_desc_loss)
-        self.log(f"{mode}.keypoints.loss", keypt_loss)
+        # self.log(f"{mode}.keypoints.loss", keypt_loss)
         self.log(f"{mode}.recon.loss", recon_loss)
         # self.log(f"{mode}.precision", precision)
         # self.log(f"{mode}.recall", recall)
         if (self._ghost_sim is not None) and (mode == "train"):
             self.log("ghost.sim", self._ghost_sim)
+        print(recon_loss, actx_desc_loss)
 
-        if math.isnan(actx_desc_loss):
-            # print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            loss = keypt_loss
+
+        # if math.isnan(actx_desc_loss):
+        #     # print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        #     loss = None
             
-            if math.isnan(keypt_loss):
-                # print("keypt loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                loss = None
-        elif math.isnan(actx_desc_loss) == 0:
-            if math.isnan(keypt_loss):
-                loss = actx_desc_loss
-            else:
-                loss = actx_desc_loss + keypt_loss
+        # else:
+        #     loss = actx_desc_loss
 
-        if loss == None: loss = recon_loss
-        else: loss += recon_loss
+        # # if math.isnan(actx_desc_loss):
+        # #     # print("actx_desc_loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        # #     loss = keypt_loss
+            
+        # #     if math.isnan(keypt_loss):
+        # #         # print("keypt loss is nan!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        # #         loss = None
+        # # elif math.isnan(actx_desc_loss) == 0:
+        # #     if math.isnan(keypt_loss):
+        # #         loss = actx_desc_loss
+        # #     else:
+        # #         loss = actx_desc_loss + keypt_loss
 
+        # if loss == None: loss = recon_loss
+        # else: loss += recon_loss
+        # self.log(f"{mode}.monitor.loss", loss)
 
-        return loss
+        return loss_for_log
 
     def training_step(self, batch, batch_idx):
         return self._total_loss(

@@ -89,11 +89,12 @@ from silk.models.silk import matcher
 # CHECKPOINT_PATH = os.path.join(
 #     os.path.dirname(__file__), "../../../lightning_logs/sparse_recon_loss/checkpoints/epoch=9-step=8359.ckpt"
 # )
+# CHECKPOINT_PATH = os.path.join(
+#     os.path.dirname(__file__), "../../../lightning_logs/sparse_recon_loss_1/checkpoints/epoch=55-step=46815.ckpt"
+# )
 CHECKPOINT_PATH = os.path.join(
-    os.path.dirname(__file__), "../../../lightning_logs/sparse_recon_loss_1/checkpoints/epoch=99-step=83599.ckpt"
+    os.path.dirname(__file__), "../../../lightning_logs/sparse_recon_loss_2/checkpoints/epoch=18-step=15883.ckpt"
 )
-
-
 
 
 
